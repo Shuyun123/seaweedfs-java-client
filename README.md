@@ -5,7 +5,7 @@
 [![MIT license](http://img.shields.io/badge/license-MIT-blue.svg)](http://opensource.org/licenses/MIT)
 
 
-######项目更改自[weed-client](https://github.com/lokra/weed-client)，修复了一下作者原来的部分bug，然后重新打包了。
+项目更改自[weed-client](https://github.com/lokra/weed-client)，修复了一下作者原来的部分bug，然后重新打包了。
 
 
 # Quick Start
@@ -54,7 +54,7 @@ template.saveFileByStream("filename.doc", someFile);
 
 The Apache Software License, Version 2.0
 
-Copyright [2017] [Anumbrella]
+Copyright  [2017]  [Anumbrella]
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
