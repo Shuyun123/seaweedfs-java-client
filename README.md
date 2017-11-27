@@ -2,7 +2,7 @@
 
 [![Maven Central](http://img.shields.io/badge/maven_central-0.0.1.RELEASE-brightgreen.svg)](https://search.maven.org/#artifactdetails%7Corg.lokra.seaweedfs%7Cseaweedfs-client%7C0.7.3.RELEASE%7Cjar)
 [![GitHub Release](http://img.shields.io/badge/Release-0.0.1.RELEASE-brightgreen.svg)](https://github.com/lokra-platform/seaweedfs-client/releases/tag/0.7.3.RELEASE)
-[![MIT license](http://img.shields.io/badge/license-MIT-blue.svg)](http://opensource.org/licenses/Apache)
+[![Apache license](https://img.shields.io/badge/license-Apache-blue.svg)](http://opensource.org/licenses/Apache)
 
 
 项目更改自[weed-client](https://github.com/lokra/weed-client)，修复了一下作者原来的部分bug，然后重新打包了。
