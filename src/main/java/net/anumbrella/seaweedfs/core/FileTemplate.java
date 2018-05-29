@@ -89,13 +89,15 @@ public class FileTemplate implements InitializingBean, DisposableBean {
             uploadUrl = assignFileKeyResult.getUrl();
 
         // Upload file
+        // 加入文件完整地址
         return new FileHandleStatus(
                 assignFileKeyResult.getFid(),
                 volumeWrapper.uploadFile(
                         uploadUrl,
                         assignFileKeyResult.getFid(),
                         fileName, stream,
-                        timeToLive, contentType));
+                        timeToLive, contentType)
+                ,uploadUrl);
     }
 
     /**
