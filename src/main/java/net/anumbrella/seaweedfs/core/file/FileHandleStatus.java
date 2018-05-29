@@ -9,6 +9,8 @@ public class FileHandleStatus implements Serializable{
     private String fileName;
     private String contentType;
     private long size;
+    private String fileUrl;
+
 
     public FileHandleStatus(String fileId, long lastModified, String fileName, String contentType, long size) {
         this.fileId = fileId;
@@ -21,6 +23,12 @@ public class FileHandleStatus implements Serializable{
     public FileHandleStatus(String fileId, long size) {
         this.fileId = fileId;
         this.size = size;
+    }
+    
+    public FileHandleStatus(String fileId, long size,String publicUrl) {
+        this.fileId = fileId;
+        this.size = size;
+        this.fileUrl = publicUrl+"/"+fileId;
     }
 
     public String getFileId() {
@@ -41,6 +49,14 @@ public class FileHandleStatus implements Serializable{
 
     public String getContentType() {
         return contentType;
+    }
+    
+    public String getFileUrl() {
+        return fileUrl;
+    }
+
+    public void setFileUrl(String fileUrl) {
+        this.fileUrl = fileUrl;
     }
 
     @Override

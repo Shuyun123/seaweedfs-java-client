@@ -8,6 +8,7 @@ import net.anumbrella.seaweedfs.exception.SeaweedfsException;
 import net.anumbrella.seaweedfs.exception.SeaweedfsFileNotFoundException;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpStatus;
+import org.apache.http.client.config.RequestConfig;
 import org.apache.http.client.methods.HttpDelete;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpHead;
@@ -15,6 +16,7 @@ import org.apache.http.client.methods.HttpPost;
 import org.apache.http.entity.ContentType;
 import org.apache.http.entity.mime.HttpMultipartMode;
 import org.apache.http.entity.mime.MultipartEntityBuilder;
+import org.apache.http.message.BasicHeader;
 import org.apache.http.util.CharsetUtils;
 
 import java.io.IOException;
@@ -51,18 +53,26 @@ public class VolumeWrapper {
     public long uploadFile(String url, String fid, String fileName, InputStream stream, String ttl,
                            ContentType contentType)
             throws IOException {
-        HttpPost request;
+        HttpPost httpPost;
         if (ttl != null)
-            request = new HttpPost(url + "/" + fid + "?ttl=" + ttl);
+            httpPost = new HttpPost(url + "/" + fid + "?ttl=" + ttl);
         else
-            request = new HttpPost(url + "/" + fid);
+            httpPost = new HttpPost(url + "/" + fid);
 
+
+//        RequestConfig requestConfig = RequestConfig.custom().setConnectionRequestTimeout(3000)
+//                .setConnectTimeout(3000).setSocketTimeout(3000).build();
+//        httpPost.setConfig(requestConfig);
+
+        httpPost.setHeader(new BasicHeader("Accept-Language", "zh-cn"));
         MultipartEntityBuilder builder = MultipartEntityBuilder.create();
-        builder.setMode(HttpMultipartMode.BROWSER_COMPATIBLE).setCharset(CharsetUtils.get("UTF-8"));
-        builder.addBinaryBody("upload", stream, contentType, fileName);
+        builder.setMode(HttpMultipartMode.BROWSER_COMPATIBLE);
+        builder.setCharset(CharsetUtils.get("UTF-8"));
+        builder.addBinaryBody(fileName, stream);
+
         HttpEntity entity = builder.build();
-        request.setEntity(entity);
-        JsonResponse jsonResponse = connection.fetchJsonResultByRequest(request);
+        httpPost.setEntity(entity);
+        JsonResponse jsonResponse = connection.fetchJsonResultByRequest(httpPost);
         //如果jsonResponse为空,只有可能这个文件比较大
         if ( jsonResponse == null ){
             jsonResponse = new  JsonResponse("{\"name\":\""+fileName+"\",\"size\":0}", HttpStatus.SC_OK);

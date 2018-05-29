@@ -80,13 +80,16 @@ public class FileTemplate implements InitializingBean, DisposableBean {
     public FileHandleStatus saveFileByStream(String fileName, InputStream stream, ContentType contentType)
             throws IOException {
         // Assign file key
-        final AssignFileKeyResult assignFileKeyResult =
+        AssignFileKeyResult assignFileKeyResult =
                 masterWrapper.assignFileKey(assignFileKeyParams);
         String uploadUrl;
-        if (usingPublicUrl)
+        if (usingPublicUrl){
             uploadUrl = assignFileKeyResult.getPublicUrl();
-        else
+        }
+        else{
             uploadUrl = assignFileKeyResult.getUrl();
+        }
+
 
         // Upload file
         return new FileHandleStatus(
@@ -95,7 +98,8 @@ public class FileTemplate implements InitializingBean, DisposableBean {
                         uploadUrl,
                         assignFileKeyResult.getFid(),
                         fileName, stream,
-                        timeToLive, contentType));
+                        timeToLive, contentType),
+                uploadUrl);
     }
 
     /**

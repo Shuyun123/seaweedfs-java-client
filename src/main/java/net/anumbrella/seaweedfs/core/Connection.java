@@ -24,6 +24,7 @@ import org.apache.http.client.methods.HttpRequestBase;
 import org.apache.http.client.protocol.HttpClientContext;
 import org.apache.http.config.SocketConfig;
 import org.apache.http.impl.client.CloseableHttpClient;
+import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.http.impl.client.HttpClients;
 import org.apache.http.impl.client.cache.CacheConfig;
 import org.apache.http.impl.client.cache.CachingHttpClients;
@@ -354,10 +355,17 @@ public class Connection {
         final JsonResponse jsonResponse = fetchJsonResultByRequest(request);
         Map map = objectMapper.readValue(jsonResponse.json, Map.class);
 
-        if (map.get("Leader") != null) {
-            leader = new MasterStatus((String) map.get("Leader"));
+        //不应该直接指定leader,应该先判断是否leader
+        //比如在docker环境中，masterUrl是leader,但是返回的Leader值是docker的容器ip
+        if (map.get("IsLeader") != null && ((Boolean) map.get("IsLeader"))) {
+            leader = new MasterStatus(masterUrl);
+
         } else {
-            throw new SeaweedfsException("not found seaweedfs core leader");
+            if (map.get("Leader") != null) {
+                leader = new MasterStatus((String) map.get("Leader"));
+            } else {
+                throw new SeaweedfsException("not found seaweedfs core leader");
+            }
         }
 
         peers = new ArrayList<MasterStatus>();
@@ -486,7 +494,10 @@ public class Connection {
         JsonResponse jsonResponse = null;
 
         try {
-            response = httpClient.execute(request, HttpClientContext.create());
+//            response = httpClient.execute(request, HttpClientContext.create());
+            //使用build方法，防止timeout异常
+            httpClient = HttpClientBuilder.create().build();
+            response = httpClient.execute(request);
             HttpEntity entity = response.getEntity();
             jsonResponse = new JsonResponse(EntityUtils.toString(entity), response.getStatusLine().getStatusCode());
             EntityUtils.consume(entity);
