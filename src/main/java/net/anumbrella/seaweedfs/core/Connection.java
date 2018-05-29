@@ -354,10 +354,17 @@ public class Connection {
         final JsonResponse jsonResponse = fetchJsonResultByRequest(request);
         Map map = objectMapper.readValue(jsonResponse.json, Map.class);
 
-        if (map.get("Leader") != null) {
-            leader = new MasterStatus((String) map.get("Leader"));
+        //不应该直接指定leader,应该先判断是否leader
+        //比如在docker环境中，masterUrl是leader,但是返回的Leader值是docker的容器ip
+        if (map.get("IsLeader") != null && ((Boolean) map.get("IsLeader"))) {
+            leader = new MasterStatus(masterUrl);
+
         } else {
-            throw new SeaweedfsException("not found seaweedfs core leader");
+            if (map.get("Leader") != null) {
+                leader = new MasterStatus((String) map.get("Leader"));
+            } else {
+                throw new SeaweedfsException("not found seaweedfs core leader");
+            }
         }
 
         peers = new ArrayList<MasterStatus>();
