@@ -3,8 +3,9 @@
 # latest readme
 项目frok自[SeaweedFS Client For Java](https://github.com/Shuyun123/seaweedfs-java-client.git).
 修复了以下bug:
-1.当weedfs运行在docker中时，自动更新为docker container虚拟地址的情况
+1.判定leader之前先判断IsLeader，避免当weedfs运行在docker中时，自动更新为docker container虚拟地址的情况
 2.在返回值中加入了文件的具体链接。
+3.使用HttpClientBuilder.create().build()，防止超时。
 
 maven 版本暂未更新。
 
