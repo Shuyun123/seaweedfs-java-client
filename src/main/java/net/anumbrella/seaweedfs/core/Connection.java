@@ -140,7 +140,7 @@ public class Connection {
         this.pollClusterStatusThread.updateSystemStatus(true, true);
         this.pollClusterStatusThread.start();
         this.idleConnectionMonitorThread.start();
-        log.info("seaweedfs master server connection is startup");
+        log.debug("seaweedfs master server connection is startup");
     }
 
 
@@ -166,7 +166,7 @@ public class Connection {
         closeCache();
         this.pollClusterStatusThread.shutdown();
         this.idleConnectionMonitorThread.shutdown();
-        log.info("seaweedfs master server connection is shutdown");
+        log.debug("seaweedfs master server connection is shutdown");
     }
 
     /**
@@ -261,7 +261,7 @@ public class Connection {
 
             try {
                 if (connectionClose) {
-                    log.info("lookup seaweedfs core leader by peers");
+                    log.debug("lookup seaweedfs core leader by peers");
                     if (systemClusterStatus == null || systemClusterStatus.getPeers().size() == 0) {
                         log.error("cloud not found the seaweedfs core peers");
                     } else {
@@ -295,7 +295,7 @@ public class Connection {
             systemTopologyStatus = fetchSystemTopologyStatus(url);
             if (!leaderUrl.equals(systemClusterStatus.getLeader().getUrl())) {
                 leaderUrl = (systemClusterStatus.getLeader().getUrl());
-                log.info("seaweedfs core leader is change to [" + leaderUrl + "]");
+                log.debug("seaweedfs core leader is change to [" + leaderUrl + "]");
             }
             log.debug("seaweedfs core leader is found [" + leaderUrl + "]");
         }
