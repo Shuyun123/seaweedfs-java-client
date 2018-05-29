@@ -486,7 +486,9 @@ public class Connection {
         JsonResponse jsonResponse = null;
 
         try {
-            response = httpClient.execute(request, HttpClientContext.create());
+//            response = httpClient.execute(request, HttpClientContext.create());
+            //使用build方法，防止timeout异常
+            httpClient = HttpClientBuilder.create().build();
             HttpEntity entity = response.getEntity();
             jsonResponse = new JsonResponse(EntityUtils.toString(entity), response.getStatusLine().getStatusCode());
             EntityUtils.consume(entity);
