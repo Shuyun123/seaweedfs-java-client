@@ -15,6 +15,8 @@ import net.anumbrella.seaweedfs.util.RequestPathStrategy;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.http.HttpEntity;
+import org.apache.http.HttpException;
+import org.apache.http.HttpStatus;
 import org.apache.http.client.cache.HttpCacheStorage;
 import org.apache.http.client.config.RequestConfig;
 import org.apache.http.client.methods.CloseableHttpResponse;
@@ -23,6 +25,8 @@ import org.apache.http.client.methods.HttpHead;
 import org.apache.http.client.methods.HttpRequestBase;
 import org.apache.http.client.protocol.HttpClientContext;
 import org.apache.http.config.SocketConfig;
+import org.apache.http.conn.ConnectTimeoutException;
+import org.apache.http.conn.HttpHostConnectException;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.http.impl.client.HttpClients;
@@ -501,10 +505,14 @@ public class Connection {
             HttpEntity entity = response.getEntity();
             jsonResponse = new JsonResponse(EntityUtils.toString(entity), response.getStatusLine().getStatusCode());
             EntityUtils.consume(entity);
-        }catch(Exception e){
+        }catch (HttpHostConnectException e){
+            jsonResponse = new  JsonResponse("{\"size\":-1}", HttpStatus.SC_BAD_GATEWAY);
+            log.error(" HttpHostConnectException "+request.getURI(),e);
+        }
+        catch(Exception e){
+            jsonResponse = new  JsonResponse("{\"size\":-1}", HttpStatus.SC_INTERNAL_SERVER_ERROR);
             log.error(" request url "+request.getURI(),e);
-//            objectMapper.readTree("{}").toString();
-//            jsonResponse = new JsonResponse("{}", response.getStatusLine().getStatusCode());
+
         }
         finally {
             if (response != null) {
