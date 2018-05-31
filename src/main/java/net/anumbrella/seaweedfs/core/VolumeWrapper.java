@@ -6,6 +6,8 @@ import net.anumbrella.seaweedfs.core.http.JsonResponse;
 import net.anumbrella.seaweedfs.core.http.StreamResponse;
 import net.anumbrella.seaweedfs.exception.SeaweedfsException;
 import net.anumbrella.seaweedfs.exception.SeaweedfsFileNotFoundException;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpStatus;
 import org.apache.http.client.config.RequestConfig;
@@ -27,6 +29,8 @@ public class VolumeWrapper {
 
     private Connection connection;
     private ObjectMapper objectMapper = new ObjectMapper();
+
+    private static final Log log = LogFactory.getLog(Connection.class);
 
     /**
      * Constructor.
@@ -75,6 +79,7 @@ public class VolumeWrapper {
         JsonResponse jsonResponse = connection.fetchJsonResultByRequest(httpPost);
         //如果jsonResponse为空,只有可能这个文件比较大
         if ( jsonResponse == null ){
+            log.info("jsonResponse == null");
             jsonResponse = new  JsonResponse("{\"name\":\""+fileName+"\",\"size\":0}", HttpStatus.SC_OK);
         }
         convertResponseStatusToException(jsonResponse.statusCode, url, fid, false, false, false, false);

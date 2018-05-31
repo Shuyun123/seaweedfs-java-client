@@ -82,6 +82,10 @@ public class FileTemplate implements InitializingBean, DisposableBean {
         // Assign file key
         AssignFileKeyResult assignFileKeyResult =
                 masterWrapper.assignFileKey(assignFileKeyParams);
+        //建议此处get 请求 走 nginx ----upstream----端口----publicUrl。
+        //put请求 走  url
+        //不要直接使用publicUrl
+        //防止被故意破坏
         String uploadUrl;
         if (usingPublicUrl){
             uploadUrl = assignFileKeyResult.getPublicUrl();
@@ -190,6 +194,7 @@ public class FileTemplate implements InitializingBean, DisposableBean {
      * @throws IOException Http connection is fail or server response within some error message.
      */
     public void deleteFiles(ArrayList<String> fileIds) throws IOException {
+        LinkedHashMap<String, Boolean> resultMap = new LinkedHashMap<String, Boolean>();
         if (fileIds != null)
             for (String fileId : fileIds) {
                 deleteFile(fileId);

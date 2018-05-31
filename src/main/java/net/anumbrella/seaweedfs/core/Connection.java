@@ -140,7 +140,7 @@ public class Connection {
         this.pollClusterStatusThread.updateSystemStatus(true, true);
         this.pollClusterStatusThread.start();
         this.idleConnectionMonitorThread.start();
-        log.debug("seaweedfs master server connection is startup");
+        log.info("seaweedfs master server connection is startup");
     }
 
 
@@ -166,7 +166,7 @@ public class Connection {
         closeCache();
         this.pollClusterStatusThread.shutdown();
         this.idleConnectionMonitorThread.shutdown();
-        log.debug("seaweedfs master server connection is shutdown");
+        log.info("seaweedfs master server connection is shutdown");
     }
 
     /**
@@ -261,7 +261,7 @@ public class Connection {
 
             try {
                 if (connectionClose) {
-                    log.debug("lookup seaweedfs core leader by peers");
+                    log.info("lookup seaweedfs core leader by peers");
                     if (systemClusterStatus == null || systemClusterStatus.getPeers().size() == 0) {
                         log.error("cloud not found the seaweedfs core peers");
                     } else {
@@ -295,9 +295,9 @@ public class Connection {
             systemTopologyStatus = fetchSystemTopologyStatus(url);
             if (!leaderUrl.equals(systemClusterStatus.getLeader().getUrl())) {
                 leaderUrl = (systemClusterStatus.getLeader().getUrl());
-                log.debug("seaweedfs core leader is change to [" + leaderUrl + "]");
+                log.info("seaweedfs core leader is change to [" + leaderUrl + "]");
             }
-            log.debug("seaweedfs core leader is found [" + leaderUrl + "]");
+            log.info("seaweedfs core leader is found [" + leaderUrl + "]");
         }
 
         private void shutdown() {
@@ -502,7 +502,9 @@ public class Connection {
             jsonResponse = new JsonResponse(EntityUtils.toString(entity), response.getStatusLine().getStatusCode());
             EntityUtils.consume(entity);
         }catch(Exception e){
-            log.error("request url "+request.getURI(),e);
+            log.error(" request url "+request.getURI(),e);
+//            objectMapper.readTree("{}").toString();
+//            jsonResponse = new JsonResponse("{}", response.getStatusLine().getStatusCode());
         }
         finally {
             if (response != null) {
