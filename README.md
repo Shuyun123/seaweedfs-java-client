@@ -70,6 +70,15 @@ fileSource.startup();
 ```java
 // Template used with connection manager
 FileTemplate template = new FileTemplate(fileSource.getConnection());
+
+//you can decide does it use publicUrl
+//if your client server cannot connect to weed server url,example cloud docker weed
+//when you start up your weed volume,you must config publicUrl variable
+//not recommended for use publicUrl variable, exists security risk
+//当你的客户端不能连接weed服务端，例如服务端部署在云端docker,启动的时候必须配置publicUrl参数
+//不建议使用publicUrl，存在安全风险 
+template.setUsingPublicUrl(false);
+
 template.saveFileByStream("filename.doc", someFile);
 ```
 
