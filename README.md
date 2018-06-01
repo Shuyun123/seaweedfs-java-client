@@ -39,6 +39,8 @@ FileSource fileSource = new FileSource();
 fileSource.setHost("localhost");
 // SeaweedFS master server port
 fileSource.setPort(9333);
+// Timeout
+fileSource.setConnectionTimeout(3000);
 // Startup manager and listens for the change
 fileSource.startup();
 ```
