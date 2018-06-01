@@ -1,6 +1,5 @@
 package net.anumbrella.seaweedfs.core;
 
-
 import com.fasterxml.jackson.databind.ObjectMapper;
 import net.anumbrella.seaweedfs.core.content.ForceGarbageCollectionParams;
 import net.anumbrella.seaweedfs.core.content.LookupVolumeResult;
@@ -295,6 +294,7 @@ public class Connection {
         }
 
         private void fetchSystemStatus(String url) throws IOException {
+            log.info("fetchSystemStatus url "+url);
             systemClusterStatus = fetchSystemClusterStatus(url);
             systemTopologyStatus = fetchSystemTopologyStatus(url);
             if (!leaderUrl.equals(systemClusterStatus.getLeader().getUrl())) {

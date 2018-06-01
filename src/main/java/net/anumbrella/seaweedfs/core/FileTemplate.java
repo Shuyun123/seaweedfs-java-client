@@ -1,5 +1,6 @@
 package net.anumbrella.seaweedfs.core;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import net.anumbrella.seaweedfs.core.content.*;
 import net.anumbrella.seaweedfs.core.file.FileHandleStatus;
 import net.anumbrella.seaweedfs.core.http.HeaderResponse;
@@ -43,6 +44,7 @@ public class FileTemplate implements InitializingBean, DisposableBean {
     private boolean usingPublicUrl = true;
     private boolean loadBalance = true;
     private AssignFileKeyParams assignFileKeyParams = new AssignFileKeyParams();
+    private ObjectMapper objectMapper = new ObjectMapper();
 
     /**
      * Constructor.
@@ -79,6 +81,8 @@ public class FileTemplate implements InitializingBean, DisposableBean {
      */
     public FileHandleStatus saveFileByStream(String fileName, InputStream stream, ContentType contentType)
             throws IOException {
+
+        log.info("assignFileKeyParams " +  objectMapper.writeValueAsString(assignFileKeyParams));
         // Assign file key
         AssignFileKeyResult assignFileKeyResult =
                 masterWrapper.assignFileKey(assignFileKeyParams);
@@ -93,6 +97,7 @@ public class FileTemplate implements InitializingBean, DisposableBean {
         else{
             uploadUrl = assignFileKeyResult.getUrl();
         }
+        log.info("uploadUrl "+uploadUrl);
 
 
         // Upload file
