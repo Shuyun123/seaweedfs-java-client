@@ -8,7 +8,6 @@ import net.anumbrella.seaweedfs.exception.SeaweedfsException;
 import net.anumbrella.seaweedfs.exception.SeaweedfsFileNotFoundException;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpStatus;
-import org.apache.http.client.config.RequestConfig;
 import org.apache.http.client.methods.HttpDelete;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpHead;
@@ -54,33 +53,29 @@ public class VolumeWrapper {
                            ContentType contentType)
             throws IOException {
         HttpPost httpPost;
-        if (ttl != null)
+        if (ttl != null) {
             httpPost = new HttpPost(url + "/" + fid + "?ttl=" + ttl);
-        else
+        } else {
             httpPost = new HttpPost(url + "/" + fid);
+        }
 
-
-//        RequestConfig requestConfig = RequestConfig.custom().setConnectionRequestTimeout(3000)
-//                .setConnectTimeout(3000).setSocketTimeout(3000).build();
-//        httpPost.setConfig(requestConfig);
+        MultipartEntityBuilder builder = MultipartEntityBuilder.create();
 
         httpPost.setHeader(new BasicHeader("Accept-Language", "zh-cn"));
-        MultipartEntityBuilder builder = MultipartEntityBuilder.create();
+
         builder.setMode(HttpMultipartMode.BROWSER_COMPATIBLE);
         builder.setCharset(CharsetUtils.get("UTF-8"));
-        builder.addBinaryBody(fileName, stream);
-
+        builder.addBinaryBody("upload", stream, contentType, fileName);
         HttpEntity entity = builder.build();
         httpPost.setEntity(entity);
         JsonResponse jsonResponse = connection.fetchJsonResultByRequest(httpPost);
         //如果jsonResponse为空,只有可能这个文件比较大
-        if ( jsonResponse == null ){
-            jsonResponse = new  JsonResponse("{\"name\":\""+fileName+"\",\"size\":0}", HttpStatus.SC_OK);
+        if (jsonResponse == null) {
+            jsonResponse = new JsonResponse("{\"name\":\"" + fileName + "\",\"size\":0}", HttpStatus.SC_OK);
         }
         convertResponseStatusToException(jsonResponse.statusCode, url, fid, false, false, false, false);
         return (Integer) objectMapper.readValue(jsonResponse.json, Map.class).get("size");
     }
-
 
 
     /**
@@ -170,26 +165,30 @@ public class VolumeWrapper {
             case 2:
                 return;
             case 3:
-                if (ignoreRedirect)
+                if (ignoreRedirect) {
                     return;
+                }
                 throw new SeaweedfsException(
                         "fetch file from [" + url + "/" + fid + "] is redirect, " +
                                 "response stats code is [" + statusCode + "]");
             case 4:
-                if (statusCode == 404 && ignoreNotFound)
+                if (statusCode == 404 && ignoreNotFound) {
                     return;
-                else if (statusCode == 404)
+                } else if (statusCode == 404) {
                     throw new SeaweedfsFileNotFoundException(
                             "fetch file from [" + url + "/" + fid + "] is not found, " +
                                     "response stats code is [" + statusCode + "]");
-                if (ignoreRequestError)
+                }
+                if (ignoreRequestError) {
                     return;
+                }
                 throw new SeaweedfsException(
                         "fetch file from [" + url + "/" + fid + "] is request error, " +
                                 "response stats code is [" + statusCode + "]");
             case 5:
-                if (ignoreServerError)
+                if (ignoreServerError) {
                     return;
+                }
                 throw new SeaweedfsException(
                         "fetch file from [" + url + "/" + fid + "] is request error, " +
                                 "response stats code is [" + statusCode + "]");

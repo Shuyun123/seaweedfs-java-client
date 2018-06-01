@@ -1,16 +1,5 @@
 # SeaweedFS Client For Java
 
-# latest readme
-项目frok自[SeaweedFS Client For Java](https://github.com/Shuyun123/seaweedfs-java-client.git).
-修复了以下bug:
-1.判定leader之前先判断IsLeader，避免当weedfs运行在docker中时，自动更新为docker container虚拟地址的情况
-2.在返回值中加入了文件的具体链接。
-3.使用HttpClientBuilder.create().build()，防止超时。
-
-maven 版本暂未更新。
-
-## Original Content
-
 [![Maven Central](http://img.shields.io/badge/maven_central-0.0.1.RELEASE-brightgreen.svg)](https://search.maven.org/#artifactdetails%7Corg.lokra.seaweedfs%7Cseaweedfs-client%7C0.7.3.RELEASE%7Cjar)
 [![GitHub Release](http://img.shields.io/badge/Release-0.0.1.RELEASE-brightgreen.svg)](https://github.com/lokra-platform/seaweedfs-client/releases/tag/0.7.3.RELEASE)
 [![Apache license](https://img.shields.io/badge/license-Apache-blue.svg)](http://opensource.org/licenses/Apache)
@@ -18,6 +7,8 @@ maven 版本暂未更新。
 
 项目更改自[weed-client](https://github.com/lokra/weed-client)，修复了一下作者原来的部分bug，然后重新打包了。
 
+
+合并更改部分bug，统一代码样式
 
 
 # Quick Start
@@ -51,8 +42,8 @@ FileSource fileSource = new FileSource();
 fileSource.setHost("localhost");
 // SeaweedFS master server port
 fileSource.setPort(9333);
-// Timeout
-fileSource.setConnectionTimeout(3000);
+// Set Connection Timeout
+fileSource.setConnectionTimeout(5000);
 // Startup manager and listens for the change
 fileSource.startup();
 ```

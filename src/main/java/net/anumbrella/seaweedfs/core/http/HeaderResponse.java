@@ -10,8 +10,9 @@ public class HeaderResponse {
 
     public HeaderResponse(Header[] headers, int httpResponseStatusCode) {
         this.httpResponseStatusCode = httpResponseStatusCode;
-        if (headers == null)
+        if (headers == null){
             return;
+        }
         this.headers = headers;
     }
 
@@ -25,16 +26,18 @@ public class HeaderResponse {
 
     public Header getLastHeader(String name) {
         for (int index = headers.length - 1; index > -1; index--) {
-            if (headers[index].getName().equals(name))
+            if (headers[index].getName().equals(name)){
                 return headers[index];
+            }
         }
         return null;
     }
 
     public Header getFirstHeader(String name) {
         for (int index = 0; index < headers.length; index++) {
-            if (headers[index].getName().equals(name))
+            if (headers[index].getName().equals(name)){
                 return headers[index];
+            }
         }
         return null;
     }

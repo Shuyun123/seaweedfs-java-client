@@ -32,9 +32,10 @@ public class MasterWrapper {
     public MasterWrapper(Connection connection) {
         this.connection = connection;
         final CacheManager cacheManager = connection.getCacheManager();
-        if (cacheManager != null)
+        if (cacheManager != null) {
             this.lookupVolumeCache =
                     cacheManager.getCache(LOOKUP_VOLUME_CACHE_ALIAS, Long.class, LookupVolumeResult.class);
+        }
     }
 
 
@@ -51,8 +52,8 @@ public class MasterWrapper {
         SystemTopologyStatus systemTopologyStatus = connection.getSystemTopologyStatus();
         List<DataCenter> dataCenterList = systemTopologyStatus.getDataCenters();
         params.setDataCenter(getOneAvailableDataCenter(dataCenterList).getId());
-        log.debug(" datacenter "+getOneAvailableDataCenter(dataCenterList) +" url "+params.toUrlParams());
-        final String url = connection.getLeaderUrl()+ RequestPathStrategy.assignFileKey + params.toUrlParams();
+        log.info(" datacenter " + getOneAvailableDataCenter(dataCenterList) + " url " + params.toUrlParams());
+        final String url = connection.getLeaderUrl() + RequestPathStrategy.assignFileKey + params.toUrlParams();
         HttpGet request = new HttpGet(url);
         JsonResponse jsonResponse = connection.fetchJsonResultByRequest(request);
         return objectMapper.readValue(jsonResponse.json, AssignFileKeyResult.class);
@@ -64,9 +65,9 @@ public class MasterWrapper {
      * @param List<DataCenter> dataCenterList 当前的数据volume集合
      * @return DataCenter 得到一个可用的集合
      * **/
-    private DataCenter getOneAvailableDataCenter(List<DataCenter> dataCenterList){
-        for(DataCenter dataCenter : dataCenterList ){
-            if ( dataCenter.getFree() != 0 ){
+    private DataCenter getOneAvailableDataCenter(List<DataCenter> dataCenterList) {
+        for (DataCenter dataCenter : dataCenterList) {
+            if (dataCenter.getFree() != 0) {
                 return dataCenter;
             }
         }
@@ -101,8 +102,6 @@ public class MasterWrapper {
         JsonResponse jsonResponse = connection.fetchJsonResultByRequest(request);
         return objectMapper.readValue(jsonResponse.json, PreAllocateVolumesResult.class);
     }
-
-
 
 
     /**
@@ -150,8 +149,9 @@ public class MasterWrapper {
      * @throws SeaweedfsException Http connection is fail.
      */
     private void checkConnection() throws SeaweedfsException {
-        if (this.connection.isConnectionClose())
+        if (this.connection.isConnectionClose()) {
             throw new SeaweedfsException("connection is closed");
+        }
     }
 
 

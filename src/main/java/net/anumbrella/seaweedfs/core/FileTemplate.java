@@ -29,7 +29,6 @@ public class FileTemplate implements InitializingBean, DisposableBean {
             new SimpleDateFormat("EEE',' dd MMM yyyy HH:mm:ss 'GMT'", Locale.US);
 
 
-
     private MasterWrapper masterWrapper;
     private VolumeWrapper volumeWrapper;
 
@@ -80,17 +79,14 @@ public class FileTemplate implements InitializingBean, DisposableBean {
     public FileHandleStatus saveFileByStream(String fileName, InputStream stream, ContentType contentType)
             throws IOException {
         // Assign file key
-        AssignFileKeyResult assignFileKeyResult =
+        final AssignFileKeyResult assignFileKeyResult =
                 masterWrapper.assignFileKey(assignFileKeyParams);
         String uploadUrl;
-        if (usingPublicUrl){
+        if (usingPublicUrl) {
             uploadUrl = assignFileKeyResult.getPublicUrl();
-        }
-        else{
+        } else {
             uploadUrl = assignFileKeyResult.getUrl();
         }
-
-
         // Upload file
         return new FileHandleStatus(
                 assignFileKeyResult.getFid(),
@@ -98,8 +94,7 @@ public class FileTemplate implements InitializingBean, DisposableBean {
                         uploadUrl,
                         assignFileKeyResult.getFid(),
                         fileName, stream,
-                        timeToLive, contentType),
-                uploadUrl);
+                        timeToLive, contentType), uploadUrl);
     }
 
     /**
@@ -136,16 +131,16 @@ public class FileTemplate implements InitializingBean, DisposableBean {
         final AssignFileKeyResult assignFileKeyResult =
                 masterWrapper.assignFileKey(params);
         String uploadUrl;
-        if (usingPublicUrl)
+        if (usingPublicUrl) {
             uploadUrl = assignFileKeyResult.getPublicUrl();
-        else
+        } else {
             uploadUrl = assignFileKeyResult.getUrl();
-
+        }
         // Upload file
         LinkedHashMap<String, FileHandleStatus> resultMap = new LinkedHashMap<String, FileHandleStatus>();
         int index = 0;
         for (String fileName : streamMap.keySet()) {
-            if (index == 0)
+            if (index == 0) {
                 resultMap.put(fileName, new FileHandleStatus(assignFileKeyResult.getFid(),
                         volumeWrapper.uploadFile(
                                 uploadUrl,
@@ -154,7 +149,7 @@ public class FileTemplate implements InitializingBean, DisposableBean {
                                 streamMap.get(fileName),
                                 timeToLive,
                                 contentType)));
-            else
+            } else {
                 resultMap.put(fileName, new FileHandleStatus(assignFileKeyResult.getFid() + "_" + String.valueOf(index),
                         volumeWrapper.uploadFile(
                                 uploadUrl,
@@ -163,6 +158,7 @@ public class FileTemplate implements InitializingBean, DisposableBean {
                                 streamMap.get(fileName),
                                 timeToLive,
                                 contentType)));
+            }
             index++;
         }
         return resultMap;
@@ -226,9 +222,9 @@ public class FileTemplate implements InitializingBean, DisposableBean {
                                                ContentType contentType) throws IOException {
         final String targetUrl = getTargetUrl(fileId);
 
-        if (!volumeWrapper.checkFileExist(targetUrl, fileId))
+        if (!volumeWrapper.checkFileExist(targetUrl, fileId)) {
             throw new SeaweedfsFileNotFoundException("file is not exist");
-
+        }
         return new FileHandleStatus(fileId,
                 volumeWrapper.uploadFile(targetUrl, fileId, fileName, stream, timeToLive, contentType));
     }
@@ -286,8 +282,9 @@ public class FileTemplate implements InitializingBean, DisposableBean {
     }
 
     public void setSameRackCount(int sameRackCount) {
-        if (sameRackCount < 0 || sameRackCount > 9)
+        if (sameRackCount < 0 || sameRackCount > 9) {
             throw new IllegalArgumentException("seaweedfs replication at same rack count is error");
+        }
         this.sameRackCount = sameRackCount;
         buildReplicationFlag();
         buildAssignFileKeyParams();
@@ -298,8 +295,9 @@ public class FileTemplate implements InitializingBean, DisposableBean {
     }
 
     public void setDiffRackCount(int diffRackCount) {
-        if (diffRackCount < 0 || diffRackCount > 9)
+        if (diffRackCount < 0 || diffRackCount > 9) {
             throw new IllegalArgumentException("seaweedfs replication at diff rack count is error");
+        }
         this.diffRackCount = diffRackCount;
         buildReplicationFlag();
         buildAssignFileKeyParams();
@@ -310,8 +308,9 @@ public class FileTemplate implements InitializingBean, DisposableBean {
     }
 
     public void setDiffDataCenterCount(int diffDataCenterCount) {
-        if (diffDataCenterCount < 0 || diffDataCenterCount > 9)
+        if (diffDataCenterCount < 0 || diffDataCenterCount > 9) {
             throw new IllegalArgumentException("seaweedfs replication at diff data center count is error");
+        }
         this.diffDataCenterCount = diffDataCenterCount;
         buildReplicationFlag();
         buildAssignFileKeyParams();
@@ -322,10 +321,11 @@ public class FileTemplate implements InitializingBean, DisposableBean {
     }
 
     public void setTimeToLive(String timeToLive) {
-        if (timeToLive != null && timeToLive.trim().isEmpty())
+        if (timeToLive != null && timeToLive.trim().isEmpty()) {
             this.timeToLive = null;
-        else
+        } else {
             this.timeToLive = timeToLive;
+        }
         buildAssignFileKeyParams();
     }
 
@@ -381,21 +381,22 @@ public class FileTemplate implements InitializingBean, DisposableBean {
 
 
     private String getTargetUrl(String fileId) throws IOException {
-        if (usingPublicUrl)
+        if (usingPublicUrl) {
             return getTargetLocation(fileId).getPublicUrl();
-        else
+        } else {
             return getTargetLocation(fileId).getUrl();
+        }
+
     }
 
     private LocationResult getTargetLocation(String fileId) throws IOException {
         final LookupVolumeResult volumeResult = masterWrapper.lookupVolume(new LookupVolumeParams(fileId, collection));
-        if (volumeResult.getLocations() == null || volumeResult.getLocations().size() == 0)
+        if (volumeResult.getLocations() == null || volumeResult.getLocations().size() == 0) {
             throw new SeaweedfsFileDeleteException(fileId,
                     new SeaweedfsException("can not found the volume server"));
+        }
         return volumeResult.getLocations().iterator().next();
     }
-
-
 
 
     @Override
