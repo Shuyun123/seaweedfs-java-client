@@ -503,22 +503,10 @@ public class Connection {
             HttpEntity entity = response.getEntity();
             jsonResponse = new JsonResponse(EntityUtils.toString(entity), response.getStatusLine().getStatusCode());
             EntityUtils.consume(entity);
-<<<<<<< HEAD
-        }catch (HttpHostConnectException e){
-            jsonResponse = new  JsonResponse("{\"size\":-1}", HttpStatus.SC_BAD_GATEWAY);
-            log.error(" HttpHostConnectException "+request.getURI(),e);
-        }
-        catch(Exception e){
-            jsonResponse = new  JsonResponse("{\"size\":-1}", HttpStatus.SC_INTERNAL_SERVER_ERROR);
-            log.error(" request url "+request.getURI(),e);
 
-        }
-        finally {
-=======
         } catch (Exception e) {
             log.error("request url " + request.getURI(), e);
         } finally {
->>>>>>> 9996ec21def4749fad3454fac1d83d29e3245ca8
             if (response != null) {
                 try {
                     response.close();

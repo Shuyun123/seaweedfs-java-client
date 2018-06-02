@@ -95,12 +95,9 @@ public class FileTemplate implements InitializingBean, DisposableBean {
         } else {
             uploadUrl = assignFileKeyResult.getUrl();
         }
-<<<<<<< HEAD
         log.info("uploadUrl "+uploadUrl);
 
 
-=======
->>>>>>> 9996ec21def4749fad3454fac1d83d29e3245ca8
         // Upload file
         return new FileHandleStatus(
                 assignFileKeyResult.getFid(),

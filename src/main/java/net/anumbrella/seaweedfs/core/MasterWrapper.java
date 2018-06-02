@@ -54,14 +54,10 @@ public class MasterWrapper {
         SystemTopologyStatus systemTopologyStatus = connection.getSystemTopologyStatus();
         List<DataCenter> dataCenterList = systemTopologyStatus.getDataCenters();
         params.setDataCenter(getOneAvailableDataCenter(dataCenterList).getId());
-<<<<<<< HEAD
         log.info(" datacenter "+getOneAvailableDataCenter(dataCenterList) +" url "+params.toUrlParams());
-        String url = connection.getLeaderUrl()+ RequestPathStrategy.assignFileKey + params.toUrlParams();
-        log.info(" assignFileKey url "+url);
-=======
-        log.info(" datacenter " + getOneAvailableDataCenter(dataCenterList) + " url " + params.toUrlParams());
         final String url = connection.getLeaderUrl() + RequestPathStrategy.assignFileKey + params.toUrlParams();
->>>>>>> 9996ec21def4749fad3454fac1d83d29e3245ca8
+        log.info(" assignFileKey url "+url);
+        log.info(" datacenter " + getOneAvailableDataCenter(dataCenterList) + " url " + params.toUrlParams());
         HttpGet request = new HttpGet(url);
         JsonResponse jsonResponse = connection.fetchJsonResultByRequest(request);
         return objectMapper.readValue(jsonResponse.json, AssignFileKeyResult.class);

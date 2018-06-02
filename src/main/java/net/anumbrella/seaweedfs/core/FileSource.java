@@ -30,7 +30,7 @@ public class FileSource implements InitializingBean, DisposableBean {
     private HttpCacheStorage fileStreamCacheStorage = null;
     volatile private boolean startup = false;
 
-    //赠面积master为集群的模式
+    //增加master为集群的模式
     private boolean masterCluster = false;
 
     private Connection connection;

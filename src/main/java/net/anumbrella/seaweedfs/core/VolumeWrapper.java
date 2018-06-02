@@ -63,11 +63,8 @@ public class VolumeWrapper {
             httpPost = new HttpPost(url + "/" + fid);
         }
 
-<<<<<<< HEAD
-=======
         MultipartEntityBuilder builder = MultipartEntityBuilder.create();
-
->>>>>>> 9996ec21def4749fad3454fac1d83d29e3245ca8
+        
         httpPost.setHeader(new BasicHeader("Accept-Language", "zh-cn"));
 
         builder.setMode(HttpMultipartMode.BROWSER_COMPATIBLE);
@@ -77,16 +74,13 @@ public class VolumeWrapper {
         httpPost.setEntity(entity);
         JsonResponse jsonResponse = connection.fetchJsonResultByRequest(httpPost);
         //如果jsonResponse为空,只有可能这个文件比较大
-<<<<<<< HEAD
+
 //        if ( jsonResponse == null ){
 //            log.info("jsonResponse == null");
 //            jsonResponse = new  JsonResponse("{\"name\":\""+fileName+"\",\"size\":0}", HttpStatus.SC_OK);
 //        }
-=======
-        if (jsonResponse == null) {
-            jsonResponse = new JsonResponse("{\"name\":\"" + fileName + "\",\"size\":0}", HttpStatus.SC_OK);
-        }
->>>>>>> 9996ec21def4749fad3454fac1d83d29e3245ca8
+
+
         convertResponseStatusToException(jsonResponse.statusCode, url, fid, false, false, false, false);
         return (Integer) objectMapper.readValue(jsonResponse.json, Map.class).get("size");
     }
