@@ -63,14 +63,6 @@ public class VolumeWrapper {
         else
             httpPost = new HttpPost(url + "/" + fid);
 
-        //设置超时时间
-        RequestConfig requestConfig = RequestConfig.custom()
-                                        .setConnectionRequestTimeout(5000)
-                                        .setConnectTimeout(5000)
-                                        .setSocketTimeout(5000)
-                                        .build();
-        httpPost.setConfig(requestConfig);
-
         httpPost.setHeader(new BasicHeader("Accept-Language", "zh-cn"));
         MultipartEntityBuilder builder = MultipartEntityBuilder.create();
         builder.setMode(HttpMultipartMode.BROWSER_COMPATIBLE);
