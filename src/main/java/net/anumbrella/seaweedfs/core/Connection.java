@@ -504,7 +504,13 @@ public class Connection {
             jsonResponse = new JsonResponse(EntityUtils.toString(entity), response.getStatusLine().getStatusCode());
             EntityUtils.consume(entity);
 
-        } catch (Exception e) {
+        }
+        catch (HttpHostConnectException e){
+            jsonResponse = new  JsonResponse("{\"size\":-1}", HttpStatus.SC_BAD_GATEWAY);
+            log.error(" HttpHostConnectException "+request.getURI(),e);
+        }
+        catch (Exception e) {
+            jsonResponse = new  JsonResponse("{\"size\":-1}", HttpStatus.SC_INTERNAL_SERVER_ERROR);
             log.error("request url " + request.getURI(), e);
         } finally {
             if (response != null) {
