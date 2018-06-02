@@ -4,7 +4,11 @@
 
   <groupId>net.anumbrella.seaweedfs</groupId>
   <artifactId>seaweedfs-java-client</artifactId>
+<<<<<<< HEAD
   <version>0.0.3.RELEASE</version>
+=======
+  <version>0.0.1.RELEASE</version>
+>>>>>>> 9996ec21def4749fad3454fac1d83d29e3245ca8
   <packaging>jar</packaging>
 
   <name>seaweedfs-java-client</name>

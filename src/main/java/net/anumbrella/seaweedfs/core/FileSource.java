@@ -16,7 +16,7 @@ public class FileSource implements InitializingBean, DisposableBean {
 
     private String host = "localhost";
     private int port = 9333;
-    private int connectionTimeout = 60;
+    private int connectionTimeout = 3000;
     private int statusExpiry = 60;
     private int maxConnection = 100;
     private int idleConnectionExpiry = 60;
@@ -93,8 +93,9 @@ public class FileSource implements InitializingBean, DisposableBean {
      */
     public void shutdown() {
         log.info("stop connect to the seaweedfs master server");
-        if (this.connection != null)
+        if (this.connection != null){
             this.connection.stop();
+        }
     }
 
 

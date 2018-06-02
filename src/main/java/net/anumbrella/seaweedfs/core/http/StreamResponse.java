@@ -9,8 +9,9 @@ public class StreamResponse {
 
     public StreamResponse(InputStream inputStream, int httpResponseStatusCode) throws IOException {
         this.httpResponseStatusCode = httpResponseStatusCode;
-        if (inputStream == null)
+        if (inputStream == null){
             return;
+        }
 
         this.byteArrayOutputStream = new ByteArrayOutputStream();
         byte[] buffer = new byte[1024];
@@ -23,9 +24,9 @@ public class StreamResponse {
     }
 
     public InputStream getInputStream() {
-        if (byteArrayOutputStream == null)
+        if (byteArrayOutputStream == null){
             return null;
-
+        }
         return new ByteArrayInputStream(byteArrayOutputStream.toByteArray());
     }
 

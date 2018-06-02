@@ -27,7 +27,6 @@ import org.apache.http.config.SocketConfig;
 import org.apache.http.conn.ConnectTimeoutException;
 import org.apache.http.conn.HttpHostConnectException;
 import org.apache.http.impl.client.CloseableHttpClient;
-import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.http.impl.client.HttpClients;
 import org.apache.http.impl.client.cache.CacheConfig;
 import org.apache.http.impl.client.cache.CachingHttpClients;
@@ -75,10 +74,10 @@ public class Connection {
 
 
     public Connection(String leaderUrl, int connectionTimeout, long statusExpiry, long idleConnectionExpiry,
-               int maxConnection, int maxConnectionsPreRoute, boolean enableLookupVolumeCache,
-               long lookupVolumeCacheExpiry, int lookupVolumeCacheEntries,
-               boolean enableFileStreamCache, int fileStreamCacheEntries, long fileStreamCacheSize,
-               HttpCacheStorage fileStreamCacheStorage)
+                      int maxConnection, int maxConnectionsPreRoute, boolean enableLookupVolumeCache,
+                      long lookupVolumeCacheExpiry, int lookupVolumeCacheEntries,
+                      boolean enableFileStreamCache, int fileStreamCacheEntries, long fileStreamCacheSize,
+                      HttpCacheStorage fileStreamCacheStorage)
             throws IOException {
         this.leaderUrl = leaderUrl;
         this.statusExpiry = statusExpiry;
@@ -162,6 +161,7 @@ public class Connection {
                                         Duration.of(this.lookupVolumeCacheExpiry, TimeUnit.SECONDS))).build());
         }
     }
+
     /**
      * Shutdown polls for core leader.
      */
@@ -189,7 +189,6 @@ public class Connection {
     public SystemTopologyStatus getSystemTopologyStatus() {
         return systemTopologyStatus;
     }
-
 
 
     /**
@@ -363,7 +362,6 @@ public class Connection {
         //比如在docker环境中，masterUrl是leader,但是返回的Leader值是docker的容器ip
         if (map.get("IsLeader") != null && ((Boolean) map.get("IsLeader"))) {
             leader = new MasterStatus(masterUrl);
-
         } else {
             if (map.get("Leader") != null) {
                 leader = new MasterStatus((String) map.get("Leader"));
@@ -462,15 +460,18 @@ public class Connection {
         if (rawLos != null)
             for (Map<String, Object> rawLo : rawLos) {
                 Layout layout = new Layout();
-                if (rawLo.get("collection") != null || !((String) rawLo.get("collection")).isEmpty())
+                if (rawLo.get("collection") != null || !((String) rawLo.get("collection")).isEmpty()) {
                     layout.setCollection((String) rawLo.get("collection"));
-                if (rawLo.get("replication") != null || !((String) rawLo.get("replication")).isEmpty())
+                }
+                if (rawLo.get("replication") != null || !((String) rawLo.get("replication")).isEmpty()) {
                     layout.setReplication((String) rawLo.get("replication"));
-                if (rawLo.get("ttl") != null || !((String) rawLo.get("ttl")).isEmpty())
+                }
+                if (rawLo.get("ttl") != null || !((String) rawLo.get("ttl")).isEmpty()) {
                     layout.setTtl((String) rawLo.get("ttl"));
-                if (rawLo.get("writables") != null)
+                }
+                if (rawLo.get("writables") != null) {
                     layout.setWritables(((ArrayList<Integer>) rawLo.get("writables")));
-
+                }
                 layouts.add(layout);
             }
 
@@ -498,13 +499,11 @@ public class Connection {
         JsonResponse jsonResponse = null;
 
         try {
-//            response = httpClient.execute(request, HttpClientContext.create());
-            //使用build方法，防止timeout异常
-            httpClient = HttpClientBuilder.create().build();
-            response = httpClient.execute(request);
+            response = httpClient.execute(request, HttpClientContext.create());
             HttpEntity entity = response.getEntity();
             jsonResponse = new JsonResponse(EntityUtils.toString(entity), response.getStatusLine().getStatusCode());
             EntityUtils.consume(entity);
+<<<<<<< HEAD
         }catch (HttpHostConnectException e){
             jsonResponse = new  JsonResponse("{\"size\":-1}", HttpStatus.SC_BAD_GATEWAY);
             log.error(" HttpHostConnectException "+request.getURI(),e);
@@ -515,11 +514,16 @@ public class Connection {
 
         }
         finally {
+=======
+        } catch (Exception e) {
+            log.error("request url " + request.getURI(), e);
+        } finally {
+>>>>>>> 9996ec21def4749fad3454fac1d83d29e3245ca8
             if (response != null) {
                 try {
                     response.close();
                 } catch (IOException ignored) {
-                    log.error("close request url "+request.getURI(), ignored);
+                    log.error("close request url " + request.getURI(), ignored);
                 }
             }
             request.releaseConnection();
@@ -528,8 +532,9 @@ public class Connection {
         if (jsonResponse != null && jsonResponse.json.contains("\"error\":\"")) {
             Map map = objectMapper.readValue(jsonResponse.json, Map.class);
             final String errorMsg = (String) map.get("error");
-            if (errorMsg != null)
+            if (errorMsg != null) {
                 throw new SeaweedfsException(errorMsg);
+            }
         }
 
         return jsonResponse;
@@ -554,6 +559,7 @@ public class Connection {
                 try {
                     response.close();
                 } catch (IOException ignored) {
+                    ignored.printStackTrace();
                 }
             }
             request.releaseConnection();
@@ -593,8 +599,8 @@ public class Connection {
      * @param ttl                 Time to live.
      * @throws IOException IOException Http connection is fail or server response within some error message.
      */
-   public  void preAllocateVolumes(int sameRackCount, int diffRackCount, int diffDataCenterCount, int count, String dataCenter,
-                            String ttl) throws IOException {
+    public void preAllocateVolumes(int sameRackCount, int diffRackCount, int diffDataCenterCount, int count, String dataCenter,
+                                   String ttl) throws IOException {
         MasterWrapper masterWrapper = new MasterWrapper(this);
         masterWrapper.preAllocateVolumes(new PreAllocateVolumesParams(
                 String.valueOf(diffDataCenterCount) + String.valueOf(diffRackCount) + String.valueOf(sameRackCount),
@@ -626,6 +632,7 @@ public class Connection {
                 try {
                     response.close();
                 } catch (IOException ignored) {
+                    ignored.printStackTrace();
                 }
             }
             request.releaseConnection();
@@ -653,6 +660,7 @@ public class Connection {
                 try {
                     response.close();
                 } catch (IOException ignored) {
+                    ignored.printStackTrace();
                 }
             }
             request.releaseConnection();
@@ -679,7 +687,6 @@ public class Connection {
     }
 
 
-
     /**
      * Thread for close expired connections.
      */
@@ -700,6 +707,7 @@ public class Connection {
                     }
                 }
             } catch (InterruptedException ignored) {
+                ignored.printStackTrace();
             }
         }
 
