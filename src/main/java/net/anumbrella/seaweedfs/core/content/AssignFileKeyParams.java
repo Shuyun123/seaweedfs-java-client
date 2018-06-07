@@ -1,6 +1,11 @@
 package net.anumbrella.seaweedfs.core.content;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
 public class AssignFileKeyParams {
+    private static final Log log = LogFactory.getLog(AssignFileKeyParams.class);
+
     private String replication;
     private int count;
     private String dataCenter;
@@ -75,6 +80,8 @@ public class AssignFileKeyParams {
         if (ttl != null) {
             result = result + "ttl=" + ttl;
         }
+
+        log.info("toUrlParams "+result);
         return result;
     }
 

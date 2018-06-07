@@ -1,5 +1,6 @@
 package net.anumbrella.seaweedfs.core;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import net.anumbrella.seaweedfs.core.content.*;
 import net.anumbrella.seaweedfs.core.file.FileHandleStatus;
 import net.anumbrella.seaweedfs.core.http.HeaderResponse;
@@ -42,6 +43,7 @@ public class FileTemplate implements InitializingBean, DisposableBean {
     private boolean usingPublicUrl = true;
     private boolean loadBalance = true;
     private AssignFileKeyParams assignFileKeyParams = new AssignFileKeyParams();
+    private ObjectMapper objectMapper = new ObjectMapper();
 
     /**
      * Constructor.
@@ -78,15 +80,24 @@ public class FileTemplate implements InitializingBean, DisposableBean {
      */
     public FileHandleStatus saveFileByStream(String fileName, InputStream stream, ContentType contentType)
             throws IOException {
+
+        log.info("assignFileKeyParams " +  objectMapper.writeValueAsString(assignFileKeyParams));
         // Assign file key
         final AssignFileKeyResult assignFileKeyResult =
                 masterWrapper.assignFileKey(assignFileKeyParams);
+        //建议此处get 请求 走 nginx ----upstream----端口----publicUrl。
+        //put请求 走  url
+        //不要直接使用publicUrl
+        //防止被故意破坏
         String uploadUrl;
         if (usingPublicUrl) {
             uploadUrl = assignFileKeyResult.getPublicUrl();
         } else {
             uploadUrl = assignFileKeyResult.getUrl();
         }
+        log.info("uploadUrl "+uploadUrl);
+
+
         // Upload file
         return new FileHandleStatus(
                 assignFileKeyResult.getFid(),
@@ -186,6 +197,7 @@ public class FileTemplate implements InitializingBean, DisposableBean {
      * @throws IOException Http connection is fail or server response within some error message.
      */
     public void deleteFiles(ArrayList<String> fileIds) throws IOException {
+        LinkedHashMap<String, Boolean> resultMap = new LinkedHashMap<String, Boolean>();
         if (fileIds != null)
             for (String fileId : fileIds) {
                 deleteFile(fileId);

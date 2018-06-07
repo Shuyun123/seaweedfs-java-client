@@ -48,4 +48,30 @@ public class ConnectionUtil {
         boolean startHttp = serverUrl.startsWith("http");
         return startHttp ? serverUrl : "http://" + serverUrl;
     }
+
+
+    /**
+     * 检查是否为ipv4格式的host,当master为集群模式，使用nginx做负载均衡时，必须使用域名形式
+     * server_name见 nginx 9333端口对应的设置
+     */
+    public static boolean checkHostIPV4Fromat(String host){
+        if(host==null || host.length()==0){
+            return false;//字符串为空或者空串
+        }
+        String[] parts=host.split("\\.");//因为java doc里已经说明, split的参数是reg, 即正则表达式, 如果用"|"分割, 则需使用"\\|"
+        if(parts.length!=4){
+            return false;//分割开的数组根本就不是4个数字
+        }
+        for(int i=0;i<parts.length;i++){
+            try{
+                int n=Integer.parseInt(parts[i]);
+                if(n<0 || n>255){
+                    return false;//数字不在正确范围内
+                }
+            }catch (NumberFormatException e) {
+                return false;//转换数字不正确
+            }
+        }
+        return true;
+    }
 }

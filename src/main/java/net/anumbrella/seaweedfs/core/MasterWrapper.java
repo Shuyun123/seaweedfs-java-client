@@ -1,6 +1,8 @@
 package net.anumbrella.seaweedfs.core;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.oracle.javafx.jmx.json.JSONException;
 import net.anumbrella.seaweedfs.core.content.*;
 import net.anumbrella.seaweedfs.core.http.JsonResponse;
 import net.anumbrella.seaweedfs.core.topology.DataCenter;
@@ -52,8 +54,10 @@ public class MasterWrapper {
         SystemTopologyStatus systemTopologyStatus = connection.getSystemTopologyStatus();
         List<DataCenter> dataCenterList = systemTopologyStatus.getDataCenters();
         params.setDataCenter(getOneAvailableDataCenter(dataCenterList).getId());
-        log.info(" datacenter " + getOneAvailableDataCenter(dataCenterList) + " url " + params.toUrlParams());
+        log.info(" datacenter "+getOneAvailableDataCenter(dataCenterList) +" url "+params.toUrlParams());
         final String url = connection.getLeaderUrl() + RequestPathStrategy.assignFileKey + params.toUrlParams();
+        log.info(" assignFileKey url "+url);
+        log.info(" datacenter " + getOneAvailableDataCenter(dataCenterList) + " url " + params.toUrlParams());
         HttpGet request = new HttpGet(url);
         JsonResponse jsonResponse = connection.fetchJsonResultByRequest(request);
         return objectMapper.readValue(jsonResponse.json, AssignFileKeyResult.class);
@@ -62,7 +66,7 @@ public class MasterWrapper {
 
     /***
      * 得到可用的datacenter
-     * @param List<DataCenter> dataCenterList 当前的数据volume集合
+     * @param dataCenterList 当前的数据volume集合
      * @return DataCenter 得到一个可用的集合
      * **/
     private DataCenter getOneAvailableDataCenter(List<DataCenter> dataCenterList) {

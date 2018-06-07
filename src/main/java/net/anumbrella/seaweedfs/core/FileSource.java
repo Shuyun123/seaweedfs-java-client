@@ -1,5 +1,6 @@
 package net.anumbrella.seaweedfs.core;
 
+import net.anumbrella.seaweedfs.exception.SeaweedfsException;
 import net.anumbrella.seaweedfs.util.ConnectionUtil;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -29,6 +30,9 @@ public class FileSource implements InitializingBean, DisposableBean {
     private HttpCacheStorage fileStreamCacheStorage = null;
     volatile private boolean startup = false;
 
+    //增加master为集群的模式
+    private boolean masterCluster = false;
+
     private Connection connection;
 
 
@@ -50,11 +54,22 @@ public class FileSource implements InitializingBean, DisposableBean {
         if (this.startup) {
             log.info("connect is already startup");
         } else {
-            log.info("start connect to the seaweedfs master server [" +
-                    ConnectionUtil.convertUrlWithScheme(host + ":" + port) + "]");
+
             if (this.connection == null) {
+                String masterUrl = null;
+                if(masterCluster){
+                    //增加master为集群时必须为域地址的控制
+                    if(ConnectionUtil.checkHostIPV4Fromat(host)){
+                        throw new SeaweedfsException("master is cluster, you must use domain address.");
+                    }
+                    masterUrl = ConnectionUtil.convertUrlWithScheme(host);
+                }else{
+                    masterUrl = ConnectionUtil.convertUrlWithScheme(host + ":" + port);
+                }
+                log.info("start connect to the seaweedfs master server "+masterUrl);
                 this.connection = new Connection(
-                        ConnectionUtil.convertUrlWithScheme(host + ":" + port),
+                        //ConnectionUtil.convertUrlWithScheme(host + ":" + port),
+                        masterUrl,
                         this.connectionTimeout,
                         this.statusExpiry,
                         this.idleConnectionExpiry,
@@ -217,5 +232,13 @@ public class FileSource implements InitializingBean, DisposableBean {
 
     public void setFileStreamCacheStorage(HttpCacheStorage fileStreamCacheStorage) {
         this.fileStreamCacheStorage = fileStreamCacheStorage;
+    }
+
+    public boolean isMasterCluster() {
+        return masterCluster;
+    }
+
+    public void setMasterCluster(boolean masterCluster) {
+        this.masterCluster = masterCluster;
     }
 }
