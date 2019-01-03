@@ -4,11 +4,39 @@
 
   <groupId>net.anumbrella.seaweedfs</groupId>
   <artifactId>seaweedfs-java-client</artifactId>
-  <version>0.0.1.RELEASE</version>
+  <version>0.0.2.RELEASE</version>
   <packaging>jar</packaging>
 
   <name>seaweedfs-java-client</name>
   <url>http://maven.apache.org</url>
+
+  <parent>
+    <groupId>org.sonatype.oss</groupId>
+    <artifactId>oss-parent</artifactId>
+    <version>7</version>
+  </parent>
+
+  <licenses>
+    <license>
+      <name>The Apache Software License, Version 2.0</name>
+      <url>http://www.apache.org/licenses/LICENSE-2.0.txt</url>
+      <distribution>repo</distribution>
+    </license>
+  </licenses>
+
+  <scm>
+    <url>https://github.com/Shuyun123/seaweedfs-java-client</url>
+    <connection>git@github.com:Shuyun123/seaweedfs-java-client.git</connection>
+    <developerConnection>http://blog.anumbrella.net</developerConnection>
+  </scm>
+
+  <developers>
+    <developer>
+      <name>anumbrella</name>
+      <email>1197173684@qq.com</email>
+      <url>http://blog.anumbrella.net</url>
+    </developer>
+  </developers>
 
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
