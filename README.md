@@ -7,10 +7,6 @@
 
 项目更改自[weed-client](https://github.com/lokra/weed-client)，修复了一下作者原来的部分bug，然后重新打包了。
 
-
-合并更改部分bug，统一代码样式
-
-
 # Quick Start
 
 
