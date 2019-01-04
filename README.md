@@ -20,7 +20,7 @@
 <dependency>
     <groupId>net.anumbrella.seaweedfs</groupId>
     <artifactId>seaweedfs-java-client</artifactId>
-    <version>0.0.1.RELEASE</version>
+    <version>0.0.2.RELEASE</version>
 </dependency>
 ```
 
@@ -31,7 +31,7 @@ repositories {
 }
 
 dependencies {
-    compile 'net.anumbrella.seaweedfs:seaweedfs-java-client:0.0.1.RELEASE'
+    compile 'net.anumbrella.seaweedfs:seaweedfs-java-client:0.0.2.RELEASE'
 }
 ```
 
