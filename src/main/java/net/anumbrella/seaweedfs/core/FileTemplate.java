@@ -257,7 +257,7 @@ public class FileTemplate implements InitializingBean, DisposableBean {
                     headerDateFormat.parse(headerResponse.getLastHeader("Last-Modified").getValue()).getTime(),
                     headerResponse.getLastHeader("Content-Disposition").getValue()
                             .substring(10, headerResponse.getLastHeader("Content-Disposition").getValue().length() - 1),
-                    headerResponse.getLastHeader("Content-Type").getValue(),
+                    null != headerResponse.getLastHeader("Content-Type") ? headerResponse.getLastHeader("Content-Type").getValue() : null,
                     Long.parseLong(headerResponse.getLastHeader("Content-Length").getValue()));
         } catch (ParseException e) {
             throw new SeaweedfsException("Could not parse last modified time [" +
