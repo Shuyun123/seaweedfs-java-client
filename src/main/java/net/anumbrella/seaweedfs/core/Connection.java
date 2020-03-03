@@ -1,6 +1,5 @@
 package net.anumbrella.seaweedfs.core;
 
-
 import com.fasterxml.jackson.databind.ObjectMapper;
 import net.anumbrella.seaweedfs.core.content.ForceGarbageCollectionParams;
 import net.anumbrella.seaweedfs.core.content.LookupVolumeResult;
@@ -32,11 +31,11 @@ import org.apache.http.util.EntityUtils;
 import org.ehcache.CacheManager;
 import org.ehcache.config.builders.CacheConfigurationBuilder;
 import org.ehcache.config.builders.CacheManagerBuilder;
+import org.ehcache.config.builders.ExpiryPolicyBuilder;
 import org.ehcache.config.builders.ResourcePoolsBuilder;
-import org.ehcache.expiry.Duration;
-import org.ehcache.expiry.Expirations;
 
 import java.io.IOException;
+import java.time.Duration;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -69,13 +68,10 @@ public class Connection {
     private CloseableHttpClient httpClient;
     private CacheManager cacheManager = null;
 
-
     public Connection(String leaderUrl, int connectionTimeout, long statusExpiry, long idleConnectionExpiry,
-                      int maxConnection, int maxConnectionsPreRoute, boolean enableLookupVolumeCache,
-                      long lookupVolumeCacheExpiry, int lookupVolumeCacheEntries,
-                      boolean enableFileStreamCache, int fileStreamCacheEntries, long fileStreamCacheSize,
-                      HttpCacheStorage fileStreamCacheStorage)
-            throws IOException {
+            int maxConnection, int maxConnectionsPreRoute, boolean enableLookupVolumeCache,
+            long lookupVolumeCacheExpiry, int lookupVolumeCacheEntries, boolean enableFileStreamCache,
+            int fileStreamCacheEntries, long fileStreamCacheSize, HttpCacheStorage fileStreamCacheStorage) {
         this.leaderUrl = leaderUrl;
         this.statusExpiry = statusExpiry;
         this.connectionTimeout = connectionTimeout;
@@ -98,42 +94,30 @@ public class Connection {
      * Start up polls for core leader.
      */
     public void startup() {
-        final RequestConfig requestConfig = RequestConfig.custom()
-                .setConnectTimeout(this.connectionTimeout)
+        final RequestConfig requestConfig = RequestConfig.custom().setConnectTimeout(this.connectionTimeout)
                 .setSocketTimeout(connectionTimeout)
                 // 一个connection可以有多个request
-                .setConnectionRequestTimeout(connectionTimeout)
-                .build();
+                .setConnectionRequestTimeout(connectionTimeout).build();
         // Create socket configuration
-        SocketConfig socketConfig =
-                SocketConfig.custom().setTcpNoDelay(true).setSoKeepAlive(true)
-                        .setSoTimeout(connectionTimeout).build();
+        SocketConfig socketConfig = SocketConfig.custom().setTcpNoDelay(true).setSoKeepAlive(true)
+                .setSoTimeout(connectionTimeout).build();
         clientConnectionManager.setDefaultSocketConfig(socketConfig);
         if (this.enableFileStreamCache) {
             if (this.fileStreamCacheStorage == null) {
-                final CacheConfig cacheConfig = CacheConfig.custom()
-                        .setMaxCacheEntries(this.fileStreamCacheEntries)
-                        .setMaxObjectSize(this.fileStreamCacheSize)
-                        .setHeuristicCachingEnabled(true)
-                        .setHeuristicCoefficient(0.8f)
-                        .build();
-                this.httpClient = CachingHttpClients.custom()
-                        .setCacheConfig(cacheConfig)
-                        .setConnectionManager(this.clientConnectionManager)
-                        .setDefaultRequestConfig(requestConfig)
+                final CacheConfig cacheConfig = CacheConfig.custom().setMaxCacheEntries(this.fileStreamCacheEntries)
+                        .setMaxObjectSize(this.fileStreamCacheSize).setHeuristicCachingEnabled(true)
+                        .setHeuristicCoefficient(0.8f).build();
+                this.httpClient = CachingHttpClients.custom().setCacheConfig(cacheConfig)
+                        .setConnectionManager(this.clientConnectionManager).setDefaultRequestConfig(requestConfig)
                         .build();
             } else {
-                this.httpClient = CachingHttpClients.custom()
-                        .setHttpCacheStorage(this.fileStreamCacheStorage)
-                        .setConnectionManager(this.clientConnectionManager)
-                        .setDefaultRequestConfig(requestConfig)
+                this.httpClient = CachingHttpClients.custom().setHttpCacheStorage(this.fileStreamCacheStorage)
+                        .setConnectionManager(this.clientConnectionManager).setDefaultRequestConfig(requestConfig)
                         .build();
             }
         } else {
-            this.httpClient = HttpClients.custom()
-                    .setConnectionManager(this.clientConnectionManager)
-                    .setDefaultRequestConfig(requestConfig)
-                    .build();
+            this.httpClient = HttpClients.custom().setConnectionManager(this.clientConnectionManager)
+                    .setDefaultRequestConfig(requestConfig).build();
         }
         initCache();
         this.pollClusterStatusThread.updateSystemStatus(true, true);
@@ -141,7 +125,6 @@ public class Connection {
         this.idleConnectionMonitorThread.start();
         log.info("seaweedfs master server connection is startup");
     }
-
 
     /**
      * Init cache manager and cache mapping.
@@ -152,10 +135,12 @@ public class Connection {
             this.cacheManager = builder.build(true);
             if (enableLookupVolumeCache)
                 this.cacheManager.createCache(LOOKUP_VOLUME_CACHE_ALIAS,
-                        CacheConfigurationBuilder.newCacheConfigurationBuilder(Long.class, LookupVolumeResult.class,
-                                ResourcePoolsBuilder.heap(this.lookupVolumeCacheEntries))
-                                .withExpiry(Expirations.timeToLiveExpiration(
-                                        Duration.of(this.lookupVolumeCacheExpiry, TimeUnit.SECONDS))).build());
+                        CacheConfigurationBuilder
+                                .newCacheConfigurationBuilder(Long.class, LookupVolumeResult.class,
+                                        ResourcePoolsBuilder.heap(this.lookupVolumeCacheEntries))
+                                .withExpiry(ExpiryPolicyBuilder
+                                        .timeToLiveExpiration(Duration.ofSeconds(this.lookupVolumeCacheExpiry)))
+                                .build());
         }
     }
 
@@ -186,7 +171,6 @@ public class Connection {
     public SystemTopologyStatus getSystemTopologyStatus() {
         return systemTopologyStatus;
     }
-
 
     /**
      * Close all cache and close cache manager.
@@ -224,7 +208,6 @@ public class Connection {
     public String getLeaderUrl() {
         return this.leaderUrl;
     }
-
 
     /**
      * Thread for cycle to check cluster status.
@@ -339,7 +322,6 @@ public class Connection {
         return null;
     }
 
-
     /**
      * Fetch core server by seaweedfs Http API.
      *
@@ -354,8 +336,8 @@ public class Connection {
         final JsonResponse jsonResponse = fetchJsonResultByRequest(request);
         Map map = objectMapper.readValue(jsonResponse.json, Map.class);
 
-        //不应该直接指定leader,应该先判断是否leader
-        //比如在docker环境中，masterUrl是leader,但是返回的Leader值是docker的容器ip
+        // 不应该直接指定leader,应该先判断是否leader
+        // 比如在docker环境中，masterUrl是leader,但是返回的Leader值是docker的容器ip
         if (map.get("IsLeader") != null && ((Boolean) map.get("IsLeader"))) {
             leader = new MasterStatus(masterUrl);
         } else {
@@ -379,8 +361,7 @@ public class Connection {
         if (map.get("IsLeader") == null || !((Boolean) map.get("IsLeader"))) {
             peers.add(new MasterStatus(masterUrl.replace("http://", "")));
             peers.remove(leader);
-            leader.setActive(
-                    ConnectionUtil.checkUriAlive(this.httpClient, leader.getUrl()));
+            leader.setActive(ConnectionUtil.checkUriAlive(this.httpClient, leader.getUrl()));
             if (!leader.isActive())
                 throw new SeaweedfsException("seaweedfs core leader is failover");
         } else {
@@ -409,8 +390,8 @@ public class Connection {
 
         // Fetch data center from json
         List<DataCenter> dataCenters = new ArrayList<DataCenter>();
-        ArrayList<Map<String, Object>> rawDcs =
-                ((ArrayList<Map<String, Object>>) ((Map) (map.get("Topology"))).get("DataCenters"));
+        ArrayList<Map<String, Object>> rawDcs = ((ArrayList<Map<String, Object>>) ((Map) (map.get("Topology")))
+                .get("DataCenters"));
         if (rawDcs != null)
             for (Map<String, Object> rawDc : rawDcs) {
                 DataCenter dc = new DataCenter();
@@ -419,8 +400,7 @@ public class Connection {
                 dc.setMax((Integer) rawDc.get("Max"));
 
                 List<Rack> racks = new ArrayList<Rack>();
-                ArrayList<Map<String, Object>> rawRks =
-                        ((ArrayList<Map<String, Object>>) (rawDc.get("Racks")));
+                ArrayList<Map<String, Object>> rawRks = ((ArrayList<Map<String, Object>>) (rawDc.get("Racks")));
                 if (rawRks != null)
                     for (Map<String, Object> rawRk : rawRks) {
                         Rack rk = new Rack();
@@ -429,8 +409,8 @@ public class Connection {
                         rk.setFree((Integer) rawRk.get("Free"));
 
                         List<DataNode> dataNodes = new ArrayList<DataNode>();
-                        ArrayList<Map<String, Object>> rawDns =
-                                ((ArrayList<Map<String, Object>>) (rawRk.get("DataNodes")));
+                        ArrayList<Map<String, Object>> rawDns = ((ArrayList<Map<String, Object>>) (rawRk
+                                .get("DataNodes")));
 
                         if (rawDns != null)
                             for (Map<String, Object> rawDn : rawDns) {
@@ -450,9 +430,9 @@ public class Connection {
             }
 
         // Fetch data layout
-        ArrayList<Layout> layouts = new ArrayList<Layout>();
-        ArrayList<Map<String, Object>> rawLos =
-                ((ArrayList<Map<String, Object>>) ((Map) (map.get("Topology"))).get("layouts"));
+        ArrayList<Layout> layouts = new ArrayList<>();
+        ArrayList<Map<String, Object>> rawLos = ((ArrayList<Map<String, Object>>) ((Map) (map.get("Topology")))
+                .get("layouts"));
         if (rawLos != null)
             for (Map<String, Object> rawLo : rawLos) {
                 Layout layout = new Layout();
@@ -481,13 +461,13 @@ public class Connection {
         return systemTopologyStatus;
     }
 
-
     /**
      * Fetch http API json result.
      *
      * @param request Http request.
      * @return Json fetch by http response.
-     * @throws IOException Http connection is fail or server response within some error message.
+     * @throws IOException Http connection is fail or server response within some
+     *                     error message.
      */
     public JsonResponse fetchJsonResultByRequest(HttpRequestBase request) throws IOException {
         CloseableHttpResponse response = null;
@@ -528,11 +508,12 @@ public class Connection {
      *
      * @param request Only http method head.
      * @return Status code.
-     * @throws IOException Http connection is fail or server response within some error message.
+     * @throws IOException Http connection is fail or server response within some
+     *                     error message.
      */
     public int fetchStatusCodeByRequest(HttpHead request) throws IOException {
         CloseableHttpResponse response = null;
-        //request.setHeader("Connection", "close");
+        // request.setHeader("Connection", "close");
         int statusCode;
         try {
             response = httpClient.execute(request, HttpClientContext.create());
@@ -554,7 +535,8 @@ public class Connection {
      * Force garbage collection.
      *
      * @param garbageThreshold Garbage threshold.
-     * @throws IOException Http connection is fail or server response within some error message.
+     * @throws IOException Http connection is fail or server response within some
+     *                     error message.
      */
     public void forceGarbageCollection(float garbageThreshold) throws IOException {
         MasterWrapper masterWrapper = new MasterWrapper(this);
@@ -564,7 +546,8 @@ public class Connection {
     /**
      * Force garbage collection.
      *
-     * @throws IOException Http connection is fail or server response within some error message.
+     * @throws IOException Http connection is fail or server response within some
+     *                     error message.
      */
     public void forceGarbageCollection() throws IOException {
         MasterWrapper masterWrapper = new MasterWrapper(this);
@@ -580,17 +563,15 @@ public class Connection {
      * @param count               Count.
      * @param dataCenter          Data center.
      * @param ttl                 Time to live.
-     * @throws IOException IOException Http connection is fail or server response within some error message.
+     * @throws IOException IOException Http connection is fail or server response
+     *                     within some error message.
      */
-    public void preAllocateVolumes(int sameRackCount, int diffRackCount, int diffDataCenterCount, int count, String dataCenter,
-                                   String ttl) throws IOException {
+    public void preAllocateVolumes(int sameRackCount, int diffRackCount, int diffDataCenterCount, int count,
+            String dataCenter, String ttl) throws IOException {
         MasterWrapper masterWrapper = new MasterWrapper(this);
         masterWrapper.preAllocateVolumes(new PreAllocateVolumesParams(
                 String.valueOf(diffDataCenterCount) + String.valueOf(diffRackCount) + String.valueOf(sameRackCount),
-                count,
-                dataCenter,
-                ttl
-        ));
+                count, dataCenter, ttl));
     }
 
     /**
@@ -598,11 +579,12 @@ public class Connection {
      *
      * @param request Http request.
      * @return Stream fetch by http response.
-     * @throws IOException Http connection is fail or server response within some error message.
+     * @throws IOException Http connection is fail or server response within some
+     *                     error message.
      */
     public StreamResponse fetchStreamCacheByRequest(HttpRequestBase request) throws IOException {
         CloseableHttpResponse response = null;
-        //request.setHeader("Connection", "close");
+        // request.setHeader("Connection", "close");
         StreamResponse cache;
 
         try {
@@ -628,11 +610,12 @@ public class Connection {
      *
      * @param request Only http method head.
      * @return Header fetch by http response.
-     * @throws IOException Http connection is fail or server response within some error message.
+     * @throws IOException Http connection is fail or server response within some
+     *                     error message.
      */
     public HeaderResponse fetchHeaderByRequest(HttpHead request) throws IOException {
         CloseableHttpResponse response = null;
-        //request.setHeader("Connection", "close");
+        // request.setHeader("Connection", "close");
         HeaderResponse headerResponse;
 
         try {
@@ -651,24 +634,22 @@ public class Connection {
         return headerResponse;
     }
 
-
     /**
      * Check volume server status.
      *
      * @param volumeUrl Volume server url.
      * @return Volume server status.
-     * @throws IOException Http connection is fail or server response within some error message.
+     * @throws IOException Http connection is fail or server response within some
+     *                     error message.
      */
-    @SuppressWarnings({"unused", "unchecked"})
+    @SuppressWarnings({ "unused", "unchecked" })
     public VolumeStatus getVolumeStatus(String volumeUrl) throws IOException {
         HttpGet request = new HttpGet(volumeUrl + RequestPathStrategy.checkVolumeStatus);
         JsonResponse jsonResponse = fetchJsonResultByRequest(request);
-        VolumeStatus volumeStatus = objectMapper.readValue(
-                jsonResponse.json.replace("{}", "null"), VolumeStatus.class);
+        VolumeStatus volumeStatus = objectMapper.readValue(jsonResponse.json.replace("{}", "null"), VolumeStatus.class);
         volumeStatus.setUrl(volumeUrl);
         return volumeStatus;
     }
-
 
     /**
      * Thread for close expired connections.
@@ -686,7 +667,8 @@ public class Connection {
                         // Close free connection
                         clientConnectionManager.closeExpiredConnections();
                         clientConnectionManager.closeIdleConnections(idleConnectionExpiry, TimeUnit.SECONDS);
-                        log.debug("http client pool state [" + clientConnectionManager.getTotalStats().toString() + "]");
+                        log.debug(
+                                "http client pool state [" + clientConnectionManager.getTotalStats().toString() + "]");
                     }
                 }
             } catch (InterruptedException ignored) {

@@ -7,8 +7,6 @@ import net.anumbrella.seaweedfs.core.http.StreamResponse;
 import net.anumbrella.seaweedfs.exception.SeaweedfsException;
 import net.anumbrella.seaweedfs.exception.SeaweedfsFileDeleteException;
 import net.anumbrella.seaweedfs.exception.SeaweedfsFileNotFoundException;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.apache.http.entity.ContentType;
 import org.springframework.beans.factory.DisposableBean;
 import org.springframework.beans.factory.InitializingBean;
@@ -24,7 +22,6 @@ import java.util.TimeZone;
 
 public class FileTemplate implements InitializingBean, DisposableBean {
 
-    private static final Log log = LogFactory.getLog(FileTemplate.class);
     private static final SimpleDateFormat headerDateFormat =
             new SimpleDateFormat("EEE',' dd MMM yyyy HH:mm:ss 'GMT'", Locale.US);
 
@@ -137,7 +134,7 @@ public class FileTemplate implements InitializingBean, DisposableBean {
             uploadUrl = assignFileKeyResult.getUrl();
         }
         // Upload file
-        LinkedHashMap<String, FileHandleStatus> resultMap = new LinkedHashMap<String, FileHandleStatus>();
+        LinkedHashMap<String, FileHandleStatus> resultMap = new LinkedHashMap<>();
         int index = 0;
         for (String fileName : streamMap.keySet()) {
             if (index == 0) {
@@ -150,10 +147,10 @@ public class FileTemplate implements InitializingBean, DisposableBean {
                                 timeToLive,
                                 contentType)));
             } else {
-                resultMap.put(fileName, new FileHandleStatus(assignFileKeyResult.getFid() + "_" + String.valueOf(index),
+                resultMap.put(fileName, new FileHandleStatus(assignFileKeyResult.getFid() + "_" + index,
                         volumeWrapper.uploadFile(
                                 uploadUrl,
-                                assignFileKeyResult.getFid() + "_" + String.valueOf(index),
+                                assignFileKeyResult.getFid() + "_" + index,
                                 fileName,
                                 streamMap.get(fileName),
                                 timeToLive,
@@ -364,9 +361,7 @@ public class FileTemplate implements InitializingBean, DisposableBean {
     }
 
     private void buildReplicationFlag() {
-        this.replicationFlag = String.valueOf(diffDataCenterCount) +
-                String.valueOf(diffRackCount) +
-                String.valueOf(sameRackCount);
+        this.replicationFlag = diffDataCenterCount + diffRackCount + sameRackCount + "";
     }
 
     private void buildAssignFileKeyParams() {
@@ -400,13 +395,12 @@ public class FileTemplate implements InitializingBean, DisposableBean {
 
 
     @Override
-    public void destroy() throws Exception {
+    public void destroy() {
         this.masterWrapper = null;
         this.volumeWrapper = null;
     }
 
     @Override
-    public void afterPropertiesSet() throws Exception {
-
+    public void afterPropertiesSet() {
     }
 }

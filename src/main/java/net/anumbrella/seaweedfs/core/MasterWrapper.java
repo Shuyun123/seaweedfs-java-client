@@ -62,8 +62,8 @@ public class MasterWrapper {
 
     /***
      * 得到可用的datacenter
-     * @param List<DataCenter> dataCenterList 当前的数据volume集合
-     * @return DataCenter 得到一个可用的集合
+     * @param  dataCenterList 当前的数据volume集合
+     * @return 得到一个可用的集合
      * **/
     private DataCenter getOneAvailableDataCenter(List<DataCenter> dataCenterList) {
         for (DataCenter dataCenter : dataCenterList) {
@@ -116,13 +116,11 @@ public class MasterWrapper {
         LookupVolumeResult result;
         if (this.lookupVolumeCache != null) {
             result = this.lookupVolumeCache.get(params.getVolumeId());
-            if (result != null) {
-                return result;
-            } else {
+            if (result == null) {
                 result = fetchLookupVolumeResult(params);
                 this.lookupVolumeCache.put(params.getVolumeId(), result);
-                return result;
             }
+            return result;
         } else {
             return fetchLookupVolumeResult(params);
         }
