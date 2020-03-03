@@ -471,7 +471,6 @@ public class Connection {
      */
     public JsonResponse fetchJsonResultByRequest(HttpRequestBase request) throws IOException {
         CloseableHttpResponse response = null;
-        // request.setHeader("Connection", "close");
         JsonResponse jsonResponse = null;
 
         try {

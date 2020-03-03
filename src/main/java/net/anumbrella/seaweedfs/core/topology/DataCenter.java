@@ -1,5 +1,7 @@
 package net.anumbrella.seaweedfs.core.topology;
 
+import com.google.common.base.MoreObjects;
+
 import java.util.List;
 
 public class DataCenter {
@@ -42,11 +44,11 @@ public class DataCenter {
 
     @Override
     public String toString() {
-        return "DataCenter{" +
-                "id='" + id + '\'' +
-                ", free=" + free +
-                ", max=" + max +
-                ", racks=" + racks +
-                '}';
+        return MoreObjects.toStringHelper(this)
+                .add("id", id)
+                .add("free", free)
+                .add("max", max)
+                .add("racks", racks)
+                .toString();
     }
 }

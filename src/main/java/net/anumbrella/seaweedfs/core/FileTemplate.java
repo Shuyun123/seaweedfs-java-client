@@ -32,12 +32,15 @@ public class FileTemplate implements InitializingBean, DisposableBean {
     private int sameRackCount = 0;
     private int diffRackCount = 0;
     private int diffDataCenterCount = 0;
+    /**
+     * 复制规则，默认000，即不复制
+     */
     private String replicationFlag = "000";
     private String timeToLive = null;
     private String dataCenter = null;
     private String collection = null;
     private boolean usingPublicUrl = true;
-    private boolean loadBalance = true;
+//    private boolean loadBalance = true;
     private AssignFileKeyParams assignFileKeyParams = new AssignFileKeyParams();
 
     /**
@@ -278,6 +281,10 @@ public class FileTemplate implements InitializingBean, DisposableBean {
         return sameRackCount;
     }
 
+    /**
+     * 配置同一机架内机器数量
+     * @param sameRackCount 同一机架内机器数量
+     */
     public void setSameRackCount(int sameRackCount) {
         if (sameRackCount < 0 || sameRackCount > 9) {
             throw new IllegalArgumentException("seaweedfs replication at same rack count is error");
@@ -291,6 +298,10 @@ public class FileTemplate implements InitializingBean, DisposableBean {
         return diffRackCount;
     }
 
+    /**
+     * 配置同机房内机架数量
+     * @param diffRackCount 机架数量
+     */
     public void setDiffRackCount(int diffRackCount) {
         if (diffRackCount < 0 || diffRackCount > 9) {
             throw new IllegalArgumentException("seaweedfs replication at diff rack count is error");
@@ -304,6 +315,10 @@ public class FileTemplate implements InitializingBean, DisposableBean {
         return diffDataCenterCount;
     }
 
+    /**
+     * 配置机房的数量
+     * @param diffDataCenterCount 机房数量
+     */
     public void setDiffDataCenterCount(int diffDataCenterCount) {
         if (diffDataCenterCount < 0 || diffDataCenterCount > 9) {
             throw new IllegalArgumentException("seaweedfs replication at diff data center count is error");
@@ -352,16 +367,16 @@ public class FileTemplate implements InitializingBean, DisposableBean {
         this.usingPublicUrl = usingPublicUrl;
     }
 
-    public boolean isLoadBalance() {
-        return loadBalance;
-    }
-
-    public void setLoadBalance(boolean loadBalance) {
-        this.loadBalance = loadBalance;
-    }
+//    public boolean isLoadBalance() {
+//        return loadBalance;
+//    }
+//
+//    public void setLoadBalance(boolean loadBalance) {
+//        this.loadBalance = loadBalance;
+//    }
 
     private void buildReplicationFlag() {
-        this.replicationFlag = diffDataCenterCount + diffRackCount + sameRackCount + "";
+        this.replicationFlag = "" + diffDataCenterCount + diffRackCount + sameRackCount;
     }
 
     private void buildAssignFileKeyParams() {

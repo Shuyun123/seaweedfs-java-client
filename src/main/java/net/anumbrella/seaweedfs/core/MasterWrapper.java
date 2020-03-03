@@ -18,6 +18,9 @@ import java.util.List;
 
 import static net.anumbrella.seaweedfs.core.Connection.LOOKUP_VOLUME_CACHE_ALIAS;
 
+/**
+ * Master角色包装类
+ */
 public class MasterWrapper {
     private static final Log log = LogFactory.getLog(MasterWrapper.class);
     private Connection connection;

@@ -1,10 +1,31 @@
 package net.anumbrella.seaweedfs.core.content;
 
+import com.google.common.base.MoreObjects;
+import com.google.common.io.Files;
+
+/**
+ * 请求fid的参数类
+ */
 public class AssignFileKeyParams {
+    /**
+     * 复制规则
+     */
     private String replication;
+    /**
+     * 批量申请数量
+     */
     private int count;
+    /**
+     * 数据中心
+     */
     private String dataCenter;
+    /**
+     * 文件生存时间
+     */
     private String ttl;
+    /**
+     * collection名称
+     */
     private String collection;
 
     public AssignFileKeyParams() {
@@ -80,12 +101,12 @@ public class AssignFileKeyParams {
 
     @Override
     public String toString() {
-        return "AssignFileKeyParams{" +
-                "replication='" + replication + '\'' +
-                ", count=" + count +
-                ", dataCenter='" + dataCenter + '\'' +
-                ", ttl='" + ttl + '\'' +
-                ", collection='" + collection + '\'' +
-                '}';
+        return MoreObjects.toStringHelper(this)
+                .add("replication", replication)
+                .add("count", count)
+                .add("dataCenter", dataCenter)
+                .add("ttl", ttl)
+                .add("collection", collection)
+                .toString();
     }
 }
