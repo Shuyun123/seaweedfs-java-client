@@ -25,6 +25,10 @@ public class FileHandleStatus implements Serializable{
         this.size = size;
     }
 
+    public FileHandleStatus(long size) {
+        this.size = size;
+    }
+
     public FileHandleStatus(String fileId, long size,String publicUrl) {
         this.fileId = fileId;
         this.size = size;

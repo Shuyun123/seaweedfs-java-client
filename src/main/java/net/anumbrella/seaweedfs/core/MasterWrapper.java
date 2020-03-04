@@ -19,7 +19,7 @@ import java.util.List;
 import static net.anumbrella.seaweedfs.core.Connection.LOOKUP_VOLUME_CACHE_ALIAS;
 
 /**
- * Master角色包装类
+ * Master接口包装类，本类中包括了所有master API
  */
 public class MasterWrapper {
     private static final Log log = LogFactory.getLog(MasterWrapper.class);
@@ -28,9 +28,9 @@ public class MasterWrapper {
     private ObjectMapper objectMapper = new ObjectMapper();
 
     /**
-     * Constructor.
+     * 构造器.
      *
-     * @param connection Connection from file source.
+     * @param connection SeaweedFS的HTTP连接
      */
     public MasterWrapper(Connection connection) {
         this.connection = connection;
@@ -43,10 +43,10 @@ public class MasterWrapper {
 
 
     /**
-     * Assign a file key.
+     * 调度master的分配fid接口
      *
-     * @param params Assign file key params.
-     * @return Assign file key result.
+     * @param params 请求参数.
+     * @return SeaweedFS申请fid接口返回对象.
      * @throws IOException Http connection is fail or server response within some error message.
      */
     public AssignFileKeyResult assignFileKey(AssignFileKeyParams params) throws IOException {
@@ -79,9 +79,12 @@ public class MasterWrapper {
     }
 
     /**
-     * Force garbage collection.
+     * 强制进行垃圾回收，GC接口。
+     * 当你的系统进行了大量删除操作的时候，已经分配的空间并不会立刻回收，回收工作会有一个线程在后台慢慢进行。
+     * 如果空闲空间小于30%，回收进程会把volume置为只读状态，并新建一个volume，并切换到新的volume上。
+     * 本接口将会强制回收这些空间
      *
-     * @param params Force garbage collection params.
+     * @param params GC接口必要参数.
      * @throws IOException Http connection is fail or server response within some error message.
      */
     public void forceGarbageCollection(ForceGarbageCollectionParams params) throws IOException {
@@ -92,10 +95,11 @@ public class MasterWrapper {
     }
 
     /**
-     * Pre-Allocate volumes.
+     * 预分配Volume接口。
+     * 一个Volume一次只能处理一个写请求。如果想要提升并发量，使用这个接口预先分配一些volume
      *
-     * @param params pre allocate volumes params.
-     * @return pre allocate volumes result.
+     * @param params 必须的参数.
+     * @return 分配接口返回值对象
      * @throws IOException Http connection is fail or server response within some error message.
      */
     public PreAllocateVolumesResult preAllocateVolumes(PreAllocateVolumesParams params) throws IOException {
@@ -108,10 +112,10 @@ public class MasterWrapper {
 
 
     /**
-     * Lookup volume.
+     * 检查volume状态的接口.
      *
-     * @param params Lookup volume params.
-     * @return Lookup volume result.
+     * @param params 请求参数.
+     * @return 接口返回对象.
      * @throws IOException Http connection is fail or server response within some error message.
      */
     public LookupVolumeResult lookupVolume(LookupVolumeParams params) throws IOException {

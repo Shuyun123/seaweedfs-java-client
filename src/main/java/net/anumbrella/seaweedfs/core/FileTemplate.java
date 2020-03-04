@@ -28,6 +28,7 @@ public class FileTemplate implements InitializingBean, DisposableBean {
 
     private MasterWrapper masterWrapper;
     private VolumeWrapper volumeWrapper;
+    private FilerWrapper filerWrapper;
 
     private int sameRackCount = 0;
     private int diffRackCount = 0;
@@ -51,6 +52,7 @@ public class FileTemplate implements InitializingBean, DisposableBean {
     public FileTemplate(Connection connection) {
         this.masterWrapper = new MasterWrapper(connection);
         this.volumeWrapper = new VolumeWrapper(connection);
+        this.filerWrapper = new FilerWrapper(connection);
         headerDateFormat.setTimeZone(TimeZone.getTimeZone("GMT"));
     }
 
@@ -229,6 +231,16 @@ public class FileTemplate implements InitializingBean, DisposableBean {
                 volumeWrapper.uploadFile(targetUrl, fileId, fileName, stream, timeToLive, contentType));
     }
 
+    public FileHandleStatus saveFileByFiler(String fileName, InputStream inputStream, String url) throws IOException {
+        return new FileHandleStatus(filerWrapper.uploadFile(url, fileName, inputStream, ContentType.DEFAULT_BINARY));
+    }
+
+    public void deleteFileByFiler(String url) throws IOException {
+        if (!filerWrapper.checkFileExist(url)) {
+            throw new SeaweedfsFileNotFoundException("file is not exist");
+        }
+        filerWrapper.deleteFile(url);
+    }
 
     /**
      * Get file stream, this is the faster method to get file stream from server.

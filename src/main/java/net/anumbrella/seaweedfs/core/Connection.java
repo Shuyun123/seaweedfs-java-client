@@ -389,7 +389,7 @@ public class Connection {
         Map map = objectMapper.readValue(jsonResponse.json, Map.class);
 
         // Fetch data center from json
-        List<DataCenter> dataCenters = new ArrayList<DataCenter>();
+        List<DataCenter> dataCenters = new ArrayList<>();
         ArrayList<Map<String, Object>> rawDcs = ((ArrayList<Map<String, Object>>) ((Map) (map.get("Topology")))
                 .get("DataCenters"));
         if (rawDcs != null)
@@ -476,8 +476,10 @@ public class Connection {
         try {
             response = httpClient.execute(request, HttpClientContext.create());
             HttpEntity entity = response.getEntity();
-            jsonResponse = new JsonResponse(EntityUtils.toString(entity), response.getStatusLine().getStatusCode());
-            EntityUtils.consume(entity);
+            if (entity != null) {
+                jsonResponse = new JsonResponse(EntityUtils.toString(entity), response.getStatusLine().getStatusCode());
+                EntityUtils.consume(entity);
+            }
         } catch (Exception e) {
             log.error("request url " + request.getURI(), e);
         } finally {
@@ -632,6 +634,7 @@ public class Connection {
         }
         return headerResponse;
     }
+
 
     /**
      * Check volume server status.
