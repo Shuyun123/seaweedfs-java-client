@@ -41,7 +41,6 @@ public class FileTemplate implements InitializingBean, DisposableBean {
     private String dataCenter = null;
     private String collection = null;
     private boolean usingPublicUrl = true;
-//    private boolean loadBalance = true;
     private AssignFileKeyParams assignFileKeyParams = new AssignFileKeyParams();
 
     /**
@@ -57,11 +56,11 @@ public class FileTemplate implements InitializingBean, DisposableBean {
     }
 
     /**
-     * Save a file.
+     * 通过Master的上传接口，上传文件到SeaweedFS
      *
-     * @param fileName File name, that can be gzipped based on the file name extension and zip it.
-     * @param stream   File stream.
-     * @return File status.
+     * @param fileName 文件名
+     * @param stream   文件应以InputStream的形式传入该接口
+     * @return SeaweedFS会在上传文件成功后返回一段信息，详情见{@link FileHandleStatus}
      * @throws IOException Http connection is fail or server response within some error message.
      */
     public FileHandleStatus saveFileByStream(String fileName, InputStream stream) throws IOException {
@@ -72,13 +71,13 @@ public class FileTemplate implements InitializingBean, DisposableBean {
     /**
      * Save a file.
      *
-     * @param fileName    File name, that can be gzipped based on the file name extension and zip it.
-     * @param stream      File stream.
-     * @param contentType File content type.
-     * @return File status.
+     * @param fileName    文件名
+     * @param stream      文件应以InputStream的形式传入该接口
+     * @param contentType 文件内容类型
+     * @return {@link FileHandleStatus}
      * @throws IOException Http connection is fail or server response within some error message.
      */
-    public FileHandleStatus saveFileByStream(String fileName, InputStream stream, ContentType contentType)
+    private FileHandleStatus saveFileByStream(String fileName, InputStream stream, ContentType contentType)
             throws IOException {
         // Assign file key
         final AssignFileKeyResult assignFileKeyResult =
@@ -167,9 +166,9 @@ public class FileTemplate implements InitializingBean, DisposableBean {
     }
 
     /**
-     * Delete file.
+     * 删除文件接口
      *
-     * @param fileId File id whatever file is not exist.
+     * @param fileId 要删除文件的fid
      * @throws IOException Http connection is fail or server response within some error message.
      */
     public void deleteFile(String fileId) throws IOException {
@@ -182,9 +181,9 @@ public class FileTemplate implements InitializingBean, DisposableBean {
     }
 
     /**
-     * Delete files.
+     * 批量删除文件
      *
-     * @param fileIds File id list whatever file is not exist.
+     * @param fileIds 要被删除的文件fid列表
      * @throws IOException Http connection is fail or server response within some error message.
      */
     public void deleteFiles(ArrayList<String> fileIds) throws IOException {
@@ -231,10 +230,23 @@ public class FileTemplate implements InitializingBean, DisposableBean {
                 volumeWrapper.uploadFile(targetUrl, fileId, fileName, stream, timeToLive, contentType));
     }
 
+    /**
+     * 通过Filer接口上传文件
+     * @param fileName 文件名
+     * @param inputStream 文件应该以InputStream形式被传入
+     * @param url filer的URL
+     * @return {@link FileHandleStatus}
+     * @throws IOException Http connection is fail or server response within some error message.
+     */
     public FileHandleStatus saveFileByFiler(String fileName, InputStream inputStream, String url) throws IOException {
         return new FileHandleStatus(filerWrapper.uploadFile(url, fileName, inputStream, ContentType.DEFAULT_BINARY));
     }
 
+    /**
+     * 通过Filer接口删除文件
+     * @param url 要删除文件的URL
+     * @throws IOException Http connection is fail or server response within some error message.
+     */
     public void deleteFileByFiler(String url) throws IOException {
         if (!filerWrapper.checkFileExist(url)) {
             throw new SeaweedfsFileNotFoundException("file is not exist");
@@ -379,14 +391,6 @@ public class FileTemplate implements InitializingBean, DisposableBean {
         this.usingPublicUrl = usingPublicUrl;
     }
 
-//    public boolean isLoadBalance() {
-//        return loadBalance;
-//    }
-//
-//    public void setLoadBalance(boolean loadBalance) {
-//        this.loadBalance = loadBalance;
-//    }
-
     private void buildReplicationFlag() {
         this.replicationFlag = "" + diffDataCenterCount + diffRackCount + sameRackCount;
     }
@@ -408,7 +412,6 @@ public class FileTemplate implements InitializingBean, DisposableBean {
         } else {
             return getTargetLocation(fileId).getUrl();
         }
-
     }
 
     private LocationResult getTargetLocation(String fileId) throws IOException {
