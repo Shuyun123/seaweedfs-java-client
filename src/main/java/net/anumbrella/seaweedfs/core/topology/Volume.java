@@ -1,124 +1,118 @@
 package net.anumbrella.seaweedfs.core.topology;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
-
-import java.util.List;
+import com.google.common.base.MoreObjects;
 
 public class Volume {
-    @JsonProperty("Id")
-    private long id;
-    @JsonProperty("Size")
-    private long size;
-    @JsonProperty("ReplicaPlacement")
-    private ReplicaPlacement replicaPlacement;
-    @JsonProperty("Ttl")
-    private List<String> ttl;
-    @JsonProperty("Collection")
-    private String collection;
-    @JsonProperty("Version")
-    private long version;
-    @JsonProperty("FileCount")
-    private long fileCount;
-    @JsonProperty("DeleteCount")
-    private long deleteCount;
-    @JsonProperty("DeletedByteCount")
-    private long deletedByteCount;
-    @JsonProperty("ReadOnly")
-    private boolean readOnly;
+    private int Id;
 
-    public long getId() {
-        return id;
+    private int Size;
+
+    private ReplicaPlacement ReplicaPlacement;
+
+    private Ttl Ttl;
+
+    private String Collection;
+
+    private int Version;
+
+    private int FileCount;
+
+    private int DeleteCount;
+
+    private int DeletedByteCount;
+
+    private boolean ReadOnly;
+
+    private int CompactRevision;
+
+    private int ModifiedAtSecond;
+
+    private String RemoteStorageName;
+
+    private String RemoteStorageKey;
+
+    public void setId(int Id){
+        this.Id = Id;
     }
-
-    public void setId(long id) {
-        this.id = id;
+    public int getId(){
+        return this.Id;
     }
-
-    public long getSize() {
-        return size;
+    public void setSize(int Size){
+        this.Size = Size;
     }
-
-    public void setSize(long size) {
-        this.size = size;
+    public int getSize(){
+        return this.Size;
     }
-
-    public ReplicaPlacement getReplicaPlacement() {
-        return replicaPlacement;
+    public void setReplicaPlacement(ReplicaPlacement ReplicaPlacement){
+        this.ReplicaPlacement = ReplicaPlacement;
     }
-
-    public void setReplicaPlacement(ReplicaPlacement replicaPlacement) {
-        this.replicaPlacement = replicaPlacement;
+    public ReplicaPlacement getReplicaPlacement(){
+        return this.ReplicaPlacement;
     }
-
-    public List<String> getTtl() {
-        return ttl;
+    public void setTtl(Ttl Ttl){
+        this.Ttl = Ttl;
     }
-
-    public void setTtl(List<String> ttl) {
-        this.ttl = ttl;
+    public Ttl getTtl(){
+        return this.Ttl;
     }
-
-    public String getCollection() {
-        return collection;
+    public void setCollection(String Collection){
+        this.Collection = Collection;
     }
-
-    public void setCollection(String collection) {
-        this.collection = collection;
+    public String getCollection(){
+        return this.Collection;
     }
-
-    public long getVersion() {
-        return version;
+    public void setVersion(int Version){
+        this.Version = Version;
     }
-
-    public void setVersion(long version) {
-        this.version = version;
+    public int getVersion(){
+        return this.Version;
     }
-
-    public long getFileCount() {
-        return fileCount;
+    public void setFileCount(int FileCount){
+        this.FileCount = FileCount;
     }
-
-    public void setFileCount(long fileCount) {
-        this.fileCount = fileCount;
+    public int getFileCount(){
+        return this.FileCount;
     }
-
-    public long getDeleteCount() {
-        return deleteCount;
+    public void setDeleteCount(int DeleteCount){
+        this.DeleteCount = DeleteCount;
     }
-
-    public void setDeleteCount(long deleteCount) {
-        this.deleteCount = deleteCount;
+    public int getDeleteCount(){
+        return this.DeleteCount;
     }
-
-    public long getDeletedByteCount() {
-        return deletedByteCount;
+    public void setDeletedByteCount(int DeletedByteCount){
+        this.DeletedByteCount = DeletedByteCount;
     }
-
-    public void setDeletedByteCount(long deletedByteCount) {
-        this.deletedByteCount = deletedByteCount;
+    public int getDeletedByteCount(){
+        return this.DeletedByteCount;
     }
-
-    public boolean isReadOnly() {
-        return readOnly;
+    public void setReadOnly(boolean ReadOnly){
+        this.ReadOnly = ReadOnly;
     }
-
-    public void setReadOnly(boolean readOnly) {
-        this.readOnly = readOnly;
+    public boolean getReadOnly(){
+        return this.ReadOnly;
     }
-
-    @Override
-    public String toString() {
-        return "Volume{" +
-                "id=" + id +
-                ", size=" + size +
-                ", replicaPlacement=" + replicaPlacement +
-                ", ttl=" + ttl +
-                ", collection='" + collection + '\'' +
-                ", version=" + version +
-                ", fileCount=" + fileCount +
-                ", deleteCount=" + deleteCount +
-                ", deletedByteCount=" + deletedByteCount +
-                ", readOnly=" + readOnly +
-                '}';
+    public void setCompactRevision(int CompactRevision){
+        this.CompactRevision = CompactRevision;
+    }
+    public int getCompactRevision(){
+        return this.CompactRevision;
+    }
+    public void setModifiedAtSecond(int ModifiedAtSecond){
+        this.ModifiedAtSecond = ModifiedAtSecond;
+    }
+    public int getModifiedAtSecond(){
+        return this.ModifiedAtSecond;
+    }
+    public void setRemoteStorageName(String RemoteStorageName){
+        this.RemoteStorageName = RemoteStorageName;
+    }
+    public String getRemoteStorageName(){
+        return this.RemoteStorageName;
+    }
+    public void setRemoteStorageKey(String RemoteStorageKey){
+        this.RemoteStorageKey = RemoteStorageKey;
+    }
+    public String getRemoteStorageKey(){
+        return this.RemoteStorageKey;
     }
 }

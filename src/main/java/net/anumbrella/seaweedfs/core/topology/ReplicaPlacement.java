@@ -1,45 +1,29 @@
 package net.anumbrella.seaweedfs.core.topology;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
 
 public class ReplicaPlacement {
-    @JsonProperty("SameRackCount")
-    private int sameRackCount;
-    @JsonProperty("DiffRackCount")
-    private int diffRackCount;
-    @JsonProperty("DiffDataCenterCount")
-    private int diffDataCenterCount;
+    private int SameRackCount;
 
-    public int getSameRackCount() {
-        return sameRackCount;
+    private int DiffRackCount;
+
+    private int DiffDataCenterCount;
+
+    public void setSameRackCount(int SameRackCount){
+        this.SameRackCount = SameRackCount;
     }
-
-    public void setSameRackCount(int sameRackCount) {
-        this.sameRackCount = sameRackCount;
+    public int getSameRackCount(){
+        return this.SameRackCount;
     }
-
-    public int getDiffRackCount() {
-        return diffRackCount;
+    public void setDiffRackCount(int DiffRackCount){
+        this.DiffRackCount = DiffRackCount;
     }
-
-    public void setDiffRackCount(int diffRackCount) {
-        this.diffRackCount = diffRackCount;
+    public int getDiffRackCount(){
+        return this.DiffRackCount;
     }
-
-    public int getDiffDataCenterCount() {
-        return diffDataCenterCount;
+    public void setDiffDataCenterCount(int DiffDataCenterCount){
+        this.DiffDataCenterCount = DiffDataCenterCount;
     }
-
-    public void setDiffDataCenterCount(int diffDataCenterCount) {
-        this.diffDataCenterCount = diffDataCenterCount;
-    }
-
-    @Override
-    public String toString() {
-        return "ReplicaPlacement{" +
-                "sameRackCount=" + sameRackCount +
-                ", diffRackCount=" + diffRackCount +
-                ", diffDataCenterCount=" + diffDataCenterCount +
-                '}';
+    public int getDiffDataCenterCount(){
+        return this.DiffDataCenterCount;
     }
 }

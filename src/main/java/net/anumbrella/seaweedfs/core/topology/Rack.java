@@ -3,50 +3,36 @@ package net.anumbrella.seaweedfs.core.topology;
 import java.util.List;
 
 public class Rack {
-    private String id;
-    private int free;
-    private int max;
-    private List<DataNode> dataNodes;
+    private List<DataNode> DataNodes;
 
-    public String getId() {
-        return id;
+    private int Free;
+
+    private String Id;
+
+    private int Max;
+
+    public void setDataNodes(List<DataNode> DataNodes){
+        this.DataNodes = DataNodes;
     }
-
-    public void setId(String id) {
-        this.id = id;
+    public List<DataNode> getDataNodes(){
+        return this.DataNodes;
     }
-
-    public int getFree() {
-        return free;
+    public void setFree(int Free){
+        this.Free = Free;
     }
-
-    public void setFree(int free) {
-        this.free = free;
+    public int getFree(){
+        return this.Free;
     }
-
-    public int getMax() {
-        return max;
+    public void setId(String Id){
+        this.Id = Id;
     }
-
-    public void setMax(int max) {
-        this.max = max;
+    public String getId(){
+        return this.Id;
     }
-
-    public List<DataNode> getDataNodes() {
-        return dataNodes;
+    public void setMax(int Max){
+        this.Max = Max;
     }
-
-    public void setDataNodes(List<DataNode> dataNodes) {
-        this.dataNodes = dataNodes;
-    }
-
-    @Override
-    public String toString() {
-        return "Rack{" +
-                "id='" + id + '\'' +
-                ", free=" + free +
-                ", max=" + max +
-                ", dataNodes=" + dataNodes +
-                '}';
+    public int getMax(){
+        return this.Max;
     }
 }

@@ -3,17 +3,30 @@ package net.anumbrella.seaweedfs.core;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import net.anumbrella.seaweedfs.core.content.*;
 import net.anumbrella.seaweedfs.core.http.JsonResponse;
+import net.anumbrella.seaweedfs.core.http.StreamResponse;
 import net.anumbrella.seaweedfs.core.topology.DataCenter;
+import net.anumbrella.seaweedfs.core.topology.GarbageResult;
 import net.anumbrella.seaweedfs.core.topology.SystemTopologyStatus;
 import net.anumbrella.seaweedfs.exception.SeaweedfsException;
 import net.anumbrella.seaweedfs.util.RequestPathStrategy;
+import net.anumbrella.seaweedfs.util.Utils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.apache.http.HttpEntity;
+import org.apache.http.HttpStatus;
+import org.apache.http.client.methods.HttpDelete;
 import org.apache.http.client.methods.HttpGet;
+import org.apache.http.client.methods.HttpPost;
+import org.apache.http.entity.ContentType;
+import org.apache.http.entity.mime.HttpMultipartMode;
+import org.apache.http.entity.mime.MultipartEntityBuilder;
+import org.apache.http.message.BasicHeader;
+import org.apache.http.util.CharsetUtils;
 import org.ehcache.Cache;
 import org.ehcache.CacheManager;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.List;
 
 import static net.anumbrella.seaweedfs.core.Connection.LOOKUP_VOLUME_CACHE_ALIAS;
@@ -87,11 +100,13 @@ public class MasterWrapper {
      * @param params GC接口必要参数.
      * @throws IOException Http connection is fail or server response within some error message.
      */
-    public void forceGarbageCollection(ForceGarbageCollectionParams params) throws IOException {
+    public GarbageResult forceGarbageCollection(ForceGarbageCollectionParams params) throws IOException {
         checkConnection();
         final String url = connection.getLeaderUrl() + RequestPathStrategy.forceGarbageCollection + params.toUrlParams();
         HttpGet request = new HttpGet(url);
-        connection.fetchJsonResultByRequest(request);
+        JsonResponse jsonResponse = connection.fetchJsonResultByRequest(request);
+        String json = jsonResponse.json;
+        return Utils.convertJsonToEntity(json, GarbageResult.class);
     }
 
     /**
@@ -131,6 +146,42 @@ public class MasterWrapper {
         } else {
             return fetchLookupVolumeResult(params);
         }
+    }
+
+    /**
+     * 不用请求fid，直接上传文件接口
+     * @param url submit接口地址
+     * @param fileName 文件名称
+     * @param stream 文件流
+     * @return 返回一个SubmitFileResult对象
+     * @throws IOException HTTP请求可能出现的IOException
+     */
+    public SubmitFileResult uploadFileDirectly(String url, String fileName, InputStream stream) throws IOException {
+        HttpPost request = new HttpPost(url + RequestPathStrategy.submitFile);
+        MultipartEntityBuilder builder = MultipartEntityBuilder.create();
+
+        request.setHeader(new BasicHeader("Accept-Language", "zh-cn"));
+
+        builder.setMode(HttpMultipartMode.BROWSER_COMPATIBLE);
+        builder.setCharset(CharsetUtils.get("UTF-8"));
+        builder.addBinaryBody("upload", stream, ContentType.DEFAULT_BINARY, fileName);
+        HttpEntity entity = builder.build();
+        request.setEntity(entity);
+        JsonResponse jsonResponse = connection.fetchJsonResultByRequest(request);
+        if (jsonResponse == null) {
+            jsonResponse = new JsonResponse("{\"name\":\"" + fileName + "\",\"size\":0}", HttpStatus.SC_OK);
+        }
+        Utils.convertResponseStatusToException(jsonResponse.statusCode, url, false, false, false, false);
+        String response = jsonResponse.json;
+        return Utils.convertJsonToEntity(response, SubmitFileResult.class);
+    }
+
+    public int deleteCollection(String url, String collection) throws IOException {
+        String deleteUrl = url + RequestPathStrategy.deleteCollection + "?collection=" + collection;
+        HttpDelete request = new HttpDelete(deleteUrl);
+        JsonResponse jsonResponse = connection.fetchJsonResultByRequest(request);
+        return jsonResponse.statusCode;
+
     }
 
     /**

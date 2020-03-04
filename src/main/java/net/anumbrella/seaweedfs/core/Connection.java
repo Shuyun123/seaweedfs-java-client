@@ -348,7 +348,7 @@ public class Connection {
             }
         }
 
-        peers = new ArrayList<MasterStatus>();
+        peers = new ArrayList<>();
 
         if (map.get("Peers") != null) {
             List<String> rawPeerList = (List<String>) map.get("Peers");
@@ -419,7 +419,7 @@ public class Connection {
                                 dn.setMax((Integer) rawDn.get("Max"));
                                 dn.setVolumes((Integer) rawDn.get("Volumes"));
                                 dn.setUrl((String) rawDn.get("Url"));
-                                dn.setPubilcUrl((String) rawDn.get("PublicUrl"));
+                                dn.setPublicUrl((String) rawDn.get("PublicUrl"));
                                 dataNodes.add(dn);
                             }
                         rk.setDataNodes(dataNodes);
@@ -479,6 +479,9 @@ public class Connection {
             if (entity != null) {
                 jsonResponse = new JsonResponse(EntityUtils.toString(entity), response.getStatusLine().getStatusCode());
                 EntityUtils.consume(entity);
+            } else {
+                //SeaweedFS在删除的时候，经常会只返回一个204，这里处理204代码
+                jsonResponse = new JsonResponse("", response.getStatusLine().getStatusCode());
             }
         } catch (Exception e) {
             log.error("request url " + request.getURI(), e);
@@ -486,8 +489,8 @@ public class Connection {
             if (response != null) {
                 try {
                     response.close();
-                } catch (IOException ignored) {
-                    log.error("close request url " + request.getURI(), ignored);
+                } catch (IOException e) {
+                    log.error("close request url " + request.getURI(), e);
                 }
             }
             request.releaseConnection();
@@ -514,7 +517,6 @@ public class Connection {
      */
     public int fetchStatusCodeByRequest(HttpHead request) throws IOException {
         CloseableHttpResponse response = null;
-        // request.setHeader("Connection", "close");
         int statusCode;
         try {
             response = httpClient.execute(request, HttpClientContext.create());
@@ -523,8 +525,8 @@ public class Connection {
             if (response != null) {
                 try {
                     response.close();
-                } catch (IOException ignored) {
-                    ignored.printStackTrace();
+                } catch (IOException e) {
+                    e.printStackTrace();
                 }
             }
             request.releaseConnection();
@@ -597,8 +599,8 @@ public class Connection {
             if (response != null) {
                 try {
                     response.close();
-                } catch (IOException ignored) {
-                    ignored.printStackTrace();
+                } catch (IOException e) {
+                    e.printStackTrace();
                 }
             }
             request.releaseConnection();
@@ -626,8 +628,8 @@ public class Connection {
             if (response != null) {
                 try {
                     response.close();
-                } catch (IOException ignored) {
-                    ignored.printStackTrace();
+                } catch (IOException e) {
+                    e.printStackTrace();
                 }
             }
             request.releaseConnection();
@@ -635,23 +637,6 @@ public class Connection {
         return headerResponse;
     }
 
-
-    /**
-     * Check volume server status.
-     *
-     * @param volumeUrl Volume server url.
-     * @return Volume server status.
-     * @throws IOException Http connection is fail or server response within some
-     *                     error message.
-     */
-    @SuppressWarnings({ "unused", "unchecked" })
-    public VolumeStatus getVolumeStatus(String volumeUrl) throws IOException {
-        HttpGet request = new HttpGet(volumeUrl + RequestPathStrategy.checkVolumeStatus);
-        JsonResponse jsonResponse = fetchJsonResultByRequest(request);
-        VolumeStatus volumeStatus = objectMapper.readValue(jsonResponse.json.replace("{}", "null"), VolumeStatus.class);
-        volumeStatus.setUrl(volumeUrl);
-        return volumeStatus;
-    }
 
     /**
      * Thread for close expired connections.
@@ -673,8 +658,8 @@ public class Connection {
                                 "http client pool state [" + clientConnectionManager.getTotalStats().toString() + "]");
                     }
                 }
-            } catch (InterruptedException ignored) {
-                ignored.printStackTrace();
+            } catch (InterruptedException e) {
+                e.printStackTrace();
             }
         }
 

@@ -4,6 +4,9 @@ public class LookupVolumeParams {
     private long volumeId;
     private String collection;
 
+    public LookupVolumeParams() {
+    }
+
     public LookupVolumeParams(long volumeId) {
         this.volumeId = volumeId;
     }
@@ -26,8 +29,16 @@ public class LookupVolumeParams {
         return volumeId;
     }
 
+    public void setVolumeId(long volumeId) {
+        this.volumeId = volumeId;
+    }
+
     public String getCollection() {
         return collection;
+    }
+
+    public void setCollection(String collection) {
+        this.collection = collection;
     }
 
     private long convertVolumeId(String rawVolumeId) {
