@@ -19,20 +19,12 @@ public class ConnectionUtil {
      */
     public static boolean checkUriAlive(CloseableHttpClient client, String url) {
         boolean result = false;
-        CloseableHttpResponse response = null;
         HttpGet request = new HttpGet(url);
-        try {
-            response = client.execute(request, HttpClientContext.create());
+        try (CloseableHttpResponse response = client.execute(request, HttpClientContext.create())) {
             result = response.getStatusLine().getStatusCode() == HttpStatus.SC_OK;
         } catch (IOException e) {
             return false;
         } finally {
-            if (response != null) {
-                try {
-                    response.close();
-                } catch (IOException ignored) {
-                }
-            }
             request.releaseConnection();
         }
         return result;

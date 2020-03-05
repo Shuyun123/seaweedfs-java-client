@@ -7,8 +7,6 @@ import net.anumbrella.seaweedfs.core.http.StreamResponse;
 import net.anumbrella.seaweedfs.exception.SeaweedfsException;
 import net.anumbrella.seaweedfs.exception.SeaweedfsFileDeleteException;
 import net.anumbrella.seaweedfs.exception.SeaweedfsFileNotFoundException;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.apache.http.entity.ContentType;
 import org.springframework.beans.factory.DisposableBean;
 import org.springframework.beans.factory.InitializingBean;
@@ -24,23 +22,25 @@ import java.util.TimeZone;
 
 public class FileTemplate implements InitializingBean, DisposableBean {
 
-    private static final Log log = LogFactory.getLog(FileTemplate.class);
     private static final SimpleDateFormat headerDateFormat =
             new SimpleDateFormat("EEE',' dd MMM yyyy HH:mm:ss 'GMT'", Locale.US);
 
 
     private MasterWrapper masterWrapper;
     private VolumeWrapper volumeWrapper;
+    private FilerWrapper filerWrapper;
 
     private int sameRackCount = 0;
     private int diffRackCount = 0;
     private int diffDataCenterCount = 0;
+    /**
+     * 复制规则，默认000，即不复制
+     */
     private String replicationFlag = "000";
     private String timeToLive = null;
     private String dataCenter = null;
     private String collection = null;
     private boolean usingPublicUrl = true;
-    private boolean loadBalance = true;
     private AssignFileKeyParams assignFileKeyParams = new AssignFileKeyParams();
 
     /**
@@ -51,15 +51,16 @@ public class FileTemplate implements InitializingBean, DisposableBean {
     public FileTemplate(Connection connection) {
         this.masterWrapper = new MasterWrapper(connection);
         this.volumeWrapper = new VolumeWrapper(connection);
+        this.filerWrapper = new FilerWrapper(connection);
         headerDateFormat.setTimeZone(TimeZone.getTimeZone("GMT"));
     }
 
     /**
-     * Save a file.
+     * 通过Master的上传接口，上传文件到SeaweedFS
      *
-     * @param fileName File name, that can be gzipped based on the file name extension and zip it.
-     * @param stream   File stream.
-     * @return File status.
+     * @param fileName 文件名
+     * @param stream   文件应以InputStream的形式传入该接口
+     * @return SeaweedFS会在上传文件成功后返回一段信息，详情见{@link FileHandleStatus}
      * @throws IOException Http connection is fail or server response within some error message.
      */
     public FileHandleStatus saveFileByStream(String fileName, InputStream stream) throws IOException {
@@ -70,13 +71,13 @@ public class FileTemplate implements InitializingBean, DisposableBean {
     /**
      * Save a file.
      *
-     * @param fileName    File name, that can be gzipped based on the file name extension and zip it.
-     * @param stream      File stream.
-     * @param contentType File content type.
-     * @return File status.
+     * @param fileName    文件名
+     * @param stream      文件应以InputStream的形式传入该接口
+     * @param contentType 文件内容类型
+     * @return {@link FileHandleStatus}
      * @throws IOException Http connection is fail or server response within some error message.
      */
-    public FileHandleStatus saveFileByStream(String fileName, InputStream stream, ContentType contentType)
+    private FileHandleStatus saveFileByStream(String fileName, InputStream stream, ContentType contentType)
             throws IOException {
         // Assign file key
         final AssignFileKeyResult assignFileKeyResult =
@@ -137,7 +138,7 @@ public class FileTemplate implements InitializingBean, DisposableBean {
             uploadUrl = assignFileKeyResult.getUrl();
         }
         // Upload file
-        LinkedHashMap<String, FileHandleStatus> resultMap = new LinkedHashMap<String, FileHandleStatus>();
+        LinkedHashMap<String, FileHandleStatus> resultMap = new LinkedHashMap<>();
         int index = 0;
         for (String fileName : streamMap.keySet()) {
             if (index == 0) {
@@ -150,10 +151,10 @@ public class FileTemplate implements InitializingBean, DisposableBean {
                                 timeToLive,
                                 contentType)));
             } else {
-                resultMap.put(fileName, new FileHandleStatus(assignFileKeyResult.getFid() + "_" + String.valueOf(index),
+                resultMap.put(fileName, new FileHandleStatus(assignFileKeyResult.getFid() + "_" + index,
                         volumeWrapper.uploadFile(
                                 uploadUrl,
-                                assignFileKeyResult.getFid() + "_" + String.valueOf(index),
+                                assignFileKeyResult.getFid() + "_" + index,
                                 fileName,
                                 streamMap.get(fileName),
                                 timeToLive,
@@ -165,9 +166,9 @@ public class FileTemplate implements InitializingBean, DisposableBean {
     }
 
     /**
-     * Delete file.
+     * 删除文件接口
      *
-     * @param fileId File id whatever file is not exist.
+     * @param fileId 要删除文件的fid
      * @throws IOException Http connection is fail or server response within some error message.
      */
     public void deleteFile(String fileId) throws IOException {
@@ -180,9 +181,9 @@ public class FileTemplate implements InitializingBean, DisposableBean {
     }
 
     /**
-     * Delete files.
+     * 批量删除文件
      *
-     * @param fileIds File id list whatever file is not exist.
+     * @param fileIds 要被删除的文件fid列表
      * @throws IOException Http connection is fail or server response within some error message.
      */
     public void deleteFiles(ArrayList<String> fileIds) throws IOException {
@@ -229,6 +230,29 @@ public class FileTemplate implements InitializingBean, DisposableBean {
                 volumeWrapper.uploadFile(targetUrl, fileId, fileName, stream, timeToLive, contentType));
     }
 
+    /**
+     * 通过Filer接口上传文件
+     * @param fileName 文件名
+     * @param inputStream 文件应该以InputStream形式被传入
+     * @param url filer的URL
+     * @return {@link FileHandleStatus}
+     * @throws IOException Http connection is fail or server response within some error message.
+     */
+    public FileHandleStatus saveFileByFiler(String fileName, InputStream inputStream, String url) throws IOException {
+        return new FileHandleStatus(filerWrapper.uploadFile(url, fileName, inputStream, ContentType.DEFAULT_BINARY));
+    }
+
+    /**
+     * 通过Filer接口删除文件
+     * @param url 要删除文件的URL
+     * @throws IOException Http connection is fail or server response within some error message.
+     */
+    public void deleteFileByFiler(String url) throws IOException {
+        if (!filerWrapper.checkFileExist(url)) {
+            throw new SeaweedfsFileNotFoundException("file is not exist");
+        }
+        filerWrapper.deleteFile(url);
+    }
 
     /**
      * Get file stream, this is the faster method to get file stream from server.
@@ -281,6 +305,10 @@ public class FileTemplate implements InitializingBean, DisposableBean {
         return sameRackCount;
     }
 
+    /**
+     * 配置同一机架内机器数量
+     * @param sameRackCount 同一机架内机器数量
+     */
     public void setSameRackCount(int sameRackCount) {
         if (sameRackCount < 0 || sameRackCount > 9) {
             throw new IllegalArgumentException("seaweedfs replication at same rack count is error");
@@ -294,6 +322,10 @@ public class FileTemplate implements InitializingBean, DisposableBean {
         return diffRackCount;
     }
 
+    /**
+     * 配置同机房内机架数量
+     * @param diffRackCount 机架数量
+     */
     public void setDiffRackCount(int diffRackCount) {
         if (diffRackCount < 0 || diffRackCount > 9) {
             throw new IllegalArgumentException("seaweedfs replication at diff rack count is error");
@@ -307,6 +339,10 @@ public class FileTemplate implements InitializingBean, DisposableBean {
         return diffDataCenterCount;
     }
 
+    /**
+     * 配置机房的数量
+     * @param diffDataCenterCount 机房数量
+     */
     public void setDiffDataCenterCount(int diffDataCenterCount) {
         if (diffDataCenterCount < 0 || diffDataCenterCount > 9) {
             throw new IllegalArgumentException("seaweedfs replication at diff data center count is error");
@@ -355,18 +391,8 @@ public class FileTemplate implements InitializingBean, DisposableBean {
         this.usingPublicUrl = usingPublicUrl;
     }
 
-    public boolean isLoadBalance() {
-        return loadBalance;
-    }
-
-    public void setLoadBalance(boolean loadBalance) {
-        this.loadBalance = loadBalance;
-    }
-
     private void buildReplicationFlag() {
-        this.replicationFlag = String.valueOf(diffDataCenterCount) +
-                String.valueOf(diffRackCount) +
-                String.valueOf(sameRackCount);
+        this.replicationFlag = "" + diffDataCenterCount + diffRackCount + sameRackCount;
     }
 
     private void buildAssignFileKeyParams() {
@@ -386,7 +412,6 @@ public class FileTemplate implements InitializingBean, DisposableBean {
         } else {
             return getTargetLocation(fileId).getUrl();
         }
-
     }
 
     private LocationResult getTargetLocation(String fileId) throws IOException {
@@ -400,13 +425,12 @@ public class FileTemplate implements InitializingBean, DisposableBean {
 
 
     @Override
-    public void destroy() throws Exception {
+    public void destroy() {
         this.masterWrapper = null;
         this.volumeWrapper = null;
     }
 
     @Override
-    public void afterPropertiesSet() throws Exception {
-
+    public void afterPropertiesSet() {
     }
 }

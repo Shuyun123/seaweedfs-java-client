@@ -3,21 +3,37 @@ package net.anumbrella.seaweedfs.core;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import net.anumbrella.seaweedfs.core.content.*;
 import net.anumbrella.seaweedfs.core.http.JsonResponse;
+import net.anumbrella.seaweedfs.core.http.StreamResponse;
 import net.anumbrella.seaweedfs.core.topology.DataCenter;
+import net.anumbrella.seaweedfs.core.topology.GarbageResult;
 import net.anumbrella.seaweedfs.core.topology.SystemTopologyStatus;
 import net.anumbrella.seaweedfs.exception.SeaweedfsException;
 import net.anumbrella.seaweedfs.util.RequestPathStrategy;
+import net.anumbrella.seaweedfs.util.Utils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.apache.http.HttpEntity;
+import org.apache.http.HttpStatus;
+import org.apache.http.client.methods.HttpDelete;
 import org.apache.http.client.methods.HttpGet;
+import org.apache.http.client.methods.HttpPost;
+import org.apache.http.entity.ContentType;
+import org.apache.http.entity.mime.HttpMultipartMode;
+import org.apache.http.entity.mime.MultipartEntityBuilder;
+import org.apache.http.message.BasicHeader;
+import org.apache.http.util.CharsetUtils;
 import org.ehcache.Cache;
 import org.ehcache.CacheManager;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.List;
 
 import static net.anumbrella.seaweedfs.core.Connection.LOOKUP_VOLUME_CACHE_ALIAS;
 
+/**
+ * Master接口包装类，本类中包括了所有master API
+ */
 public class MasterWrapper {
     private static final Log log = LogFactory.getLog(MasterWrapper.class);
     private Connection connection;
@@ -25,9 +41,9 @@ public class MasterWrapper {
     private ObjectMapper objectMapper = new ObjectMapper();
 
     /**
-     * Constructor.
+     * 构造器.
      *
-     * @param connection Connection from file source.
+     * @param connection SeaweedFS的HTTP连接
      */
     public MasterWrapper(Connection connection) {
         this.connection = connection;
@@ -40,10 +56,10 @@ public class MasterWrapper {
 
 
     /**
-     * Assign a file key.
+     * 调度master的分配fid接口
      *
-     * @param params Assign file key params.
-     * @return Assign file key result.
+     * @param params 请求参数.
+     * @return SeaweedFS申请fid接口返回对象.
      * @throws IOException Http connection is fail or server response within some error message.
      */
     public AssignFileKeyResult assignFileKey(AssignFileKeyParams params) throws IOException {
@@ -62,8 +78,8 @@ public class MasterWrapper {
 
     /***
      * 得到可用的datacenter
-     * @param List<DataCenter> dataCenterList 当前的数据volume集合
-     * @return DataCenter 得到一个可用的集合
+     * @param  dataCenterList 当前的数据volume集合
+     * @return 得到一个可用的集合
      * **/
     private DataCenter getOneAvailableDataCenter(List<DataCenter> dataCenterList) {
         for (DataCenter dataCenter : dataCenterList) {
@@ -76,23 +92,29 @@ public class MasterWrapper {
     }
 
     /**
-     * Force garbage collection.
+     * 强制进行垃圾回收，GC接口。
+     * 当你的系统进行了大量删除操作的时候，已经分配的空间并不会立刻回收，回收工作会有一个线程在后台慢慢进行。
+     * 如果空闲空间小于30%，回收进程会把volume置为只读状态，并新建一个volume，并切换到新的volume上。
+     * 本接口将会强制回收这些空间
      *
-     * @param params Force garbage collection params.
+     * @param params GC接口必要参数.
      * @throws IOException Http connection is fail or server response within some error message.
      */
-    public void forceGarbageCollection(ForceGarbageCollectionParams params) throws IOException {
+    public GarbageResult forceGarbageCollection(ForceGarbageCollectionParams params) throws IOException {
         checkConnection();
         final String url = connection.getLeaderUrl() + RequestPathStrategy.forceGarbageCollection + params.toUrlParams();
         HttpGet request = new HttpGet(url);
-        connection.fetchJsonResultByRequest(request);
+        JsonResponse jsonResponse = connection.fetchJsonResultByRequest(request);
+        String json = jsonResponse.json;
+        return Utils.convertJsonToEntity(json, GarbageResult.class);
     }
 
     /**
-     * Pre-Allocate volumes.
+     * 预分配Volume接口。
+     * 一个Volume一次只能处理一个写请求。如果想要提升并发量，使用这个接口预先分配一些volume
      *
-     * @param params pre allocate volumes params.
-     * @return pre allocate volumes result.
+     * @param params 必须的参数.
+     * @return 分配接口返回值对象
      * @throws IOException Http connection is fail or server response within some error message.
      */
     public PreAllocateVolumesResult preAllocateVolumes(PreAllocateVolumesParams params) throws IOException {
@@ -105,10 +127,10 @@ public class MasterWrapper {
 
 
     /**
-     * Lookup volume.
+     * 检查volume状态的接口.
      *
-     * @param params Lookup volume params.
-     * @return Lookup volume result.
+     * @param params 请求参数.
+     * @return 接口返回对象.
      * @throws IOException Http connection is fail or server response within some error message.
      */
     public LookupVolumeResult lookupVolume(LookupVolumeParams params) throws IOException {
@@ -116,16 +138,50 @@ public class MasterWrapper {
         LookupVolumeResult result;
         if (this.lookupVolumeCache != null) {
             result = this.lookupVolumeCache.get(params.getVolumeId());
-            if (result != null) {
-                return result;
-            } else {
+            if (result == null) {
                 result = fetchLookupVolumeResult(params);
                 this.lookupVolumeCache.put(params.getVolumeId(), result);
-                return result;
             }
+            return result;
         } else {
             return fetchLookupVolumeResult(params);
         }
+    }
+
+    /**
+     * 不用请求fid，直接上传文件接口
+     * @param url submit接口地址
+     * @param fileName 文件名称
+     * @param stream 文件流
+     * @return 返回一个SubmitFileResult对象
+     * @throws IOException HTTP请求可能出现的IOException
+     */
+    public SubmitFileResult uploadFileDirectly(String url, String fileName, InputStream stream) throws IOException {
+        HttpPost request = new HttpPost(url + RequestPathStrategy.submitFile);
+        MultipartEntityBuilder builder = MultipartEntityBuilder.create();
+
+        request.setHeader(new BasicHeader("Accept-Language", "zh-cn"));
+
+        builder.setMode(HttpMultipartMode.BROWSER_COMPATIBLE);
+        builder.setCharset(CharsetUtils.get("UTF-8"));
+        builder.addBinaryBody("upload", stream, ContentType.DEFAULT_BINARY, fileName);
+        HttpEntity entity = builder.build();
+        request.setEntity(entity);
+        JsonResponse jsonResponse = connection.fetchJsonResultByRequest(request);
+        if (jsonResponse == null) {
+            jsonResponse = new JsonResponse("{\"name\":\"" + fileName + "\",\"size\":0}", HttpStatus.SC_OK);
+        }
+        Utils.convertResponseStatusToException(jsonResponse.statusCode, url, false, false, false, false);
+        String response = jsonResponse.json;
+        return Utils.convertJsonToEntity(response, SubmitFileResult.class);
+    }
+
+    public int deleteCollection(String url, String collection) throws IOException {
+        String deleteUrl = url + RequestPathStrategy.deleteCollection + "?collection=" + collection;
+        HttpDelete request = new HttpDelete(deleteUrl);
+        JsonResponse jsonResponse = connection.fetchJsonResultByRequest(request);
+        return jsonResponse.statusCode;
+
     }
 
     /**

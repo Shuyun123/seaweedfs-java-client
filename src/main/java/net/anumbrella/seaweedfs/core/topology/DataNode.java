@@ -1,61 +1,53 @@
 package net.anumbrella.seaweedfs.core.topology;
 
-import net.anumbrella.seaweedfs.util.ConnectionUtil;
 
 public class DataNode {
-    private String url;
-    private String pubilcUrl;
-    private int volumes;
-    private int free;
-    private int max;
-    public String getUrl() {
-        return url;
-    }
+    private int EcShards;
 
-    public void setUrl(String url) {
-        this.url = ConnectionUtil.convertUrlWithScheme(url);
-    }
+    private int Free;
 
-    public String getPubilcUrl() {
-        return pubilcUrl;
-    }
+    private int Max;
 
-    public void setPubilcUrl(String pubilcUrl) {
-        this.pubilcUrl = ConnectionUtil.convertUrlWithScheme(pubilcUrl);
-    }
+    private String PublicUrl;
 
-    public int getVolumes() {
-        return volumes;
-    }
+    private String Url;
 
-    public void setVolumes(int volumes) {
-        this.volumes = volumes;
-    }
+    private int Volumes;
 
-    public int getFree() {
-        return free;
+    public void setEcShards(int EcShards){
+        this.EcShards = EcShards;
     }
-
-    public void setFree(int free) {
-        this.free = free;
+    public int getEcShards(){
+        return this.EcShards;
     }
-
-    public int getMax() {
-        return max;
+    public void setFree(int Free){
+        this.Free = Free;
     }
-
-    public void setMax(int max) {
-        this.max = max;
+    public int getFree(){
+        return this.Free;
     }
-
-    @Override
-    public String toString() {
-        return "DataNode{" +
-                "url='" + url + '\'' +
-                ", pubilcUrl='" + pubilcUrl + '\'' +
-                ", volumes=" + volumes +
-                ", free=" + free +
-                ", max=" + max +
-                '}';
+    public void setMax(int Max){
+        this.Max = Max;
+    }
+    public int getMax(){
+        return this.Max;
+    }
+    public void setPublicUrl(String PublicUrl){
+        this.PublicUrl = PublicUrl;
+    }
+    public String getPublicUrl(){
+        return this.PublicUrl;
+    }
+    public void setUrl(String Url){
+        this.Url = Url;
+    }
+    public String getUrl(){
+        return this.Url;
+    }
+    public void setVolumes(int Volumes){
+        this.Volumes = Volumes;
+    }
+    public int getVolumes(){
+        return this.Volumes;
     }
 }
