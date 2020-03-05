@@ -1,6 +1,14 @@
 package net.anumbrella.seaweedfs.core.http;
 
-import java.io.*;
+
+import com.google.common.base.MoreObjects;
+
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+
 
 public class StreamResponse {
     private ByteArrayOutputStream byteArrayOutputStream;
@@ -44,10 +52,10 @@ public class StreamResponse {
 
     @Override
     public String toString() {
-        return "StreamResponse{" +
-                "byteArrayOutputStream=" + byteArrayOutputStream +
-                ", httpResponseStatusCode=" + httpResponseStatusCode +
-                ", length=" + length +
-                '}';
+        return MoreObjects.toStringHelper(this)
+                .add("byteArrayOutputStream", byteArrayOutputStream)
+                .add("httpResponseStatusCode", httpResponseStatusCode)
+                .add("length", length)
+                .toString();
     }
 }

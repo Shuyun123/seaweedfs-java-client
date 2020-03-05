@@ -1,52 +1,40 @@
 package net.anumbrella.seaweedfs.core.topology;
 
+import com.google.common.base.MoreObjects;
+
 import java.util.List;
 
 public class DataCenter {
-    private String id;
-    private int free;
-    private int max;
-    private List<Rack> racks;
+    private int Free;
 
-    public String getId() {
-        return id;
+    private String Id;
+
+    private int Max;
+
+    private List<Rack> Racks;
+
+    public void setFree(int Free){
+        this.Free = Free;
     }
-
-    public void setId(String id) {
-        this.id = id;
+    public int getFree(){
+        return this.Free;
     }
-
-    public int getFree() {
-        return free;
+    public void setId(String Id){
+        this.Id = Id;
     }
-
-    public void setFree(int free) {
-        this.free = free;
+    public String getId(){
+        return this.Id;
     }
-
-    public int getMax() {
-        return max;
+    public void setMax(int Max){
+        this.Max = Max;
     }
-
-    public void setMax(int max) {
-        this.max = max;
+    public int getMax(){
+        return this.Max;
     }
-
-    public List<Rack> getRacks() {
-        return racks;
+    public void setRacks(List<Rack> Racks){
+        this.Racks = Racks;
     }
-
-    public void setRacks(List<Rack> racks) {
-        this.racks = racks;
-    }
-
-    @Override
-    public String toString() {
-        return "DataCenter{" +
-                "id='" + id + '\'' +
-                ", free=" + free +
-                ", max=" + max +
-                ", racks=" + racks +
-                '}';
+    public List<Rack> getRacks(){
+        return this.Racks;
     }
 }
