@@ -5,7 +5,6 @@
 [![Apache license](https://img.shields.io/badge/license-Apache-blue.svg)](http://opensource.org/licenses/Apache)
 
 
-项目更改自[seaweedfs-java-client](https://github.com/Shuyun123/seaweedfs-java-client)，增加了一些内容，更新了一些组件。
 
 
 # Quick Start
