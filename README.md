@@ -5,10 +5,35 @@
 [![Apache license](https://img.shields.io/badge/license-Apache-blue.svg)](http://opensource.org/licenses/Apache)
 
 
-项目更改自[seaweedfs-java-client](https://github.com/Shuyun123/seaweedfs-java-client)，增加了一些内容，更新了一些组件。
+项目更改自[weed-client](https://github.com/lokra/weed-client)，修复了一下作者原来的部分bug，然后重新打包了。
+
 
 
 # Quick Start
+
+
+
+##### Maven
+
+```xml
+<dependency>
+    <groupId>net.anumbrella.seaweedfs</groupId>
+    <artifactId>seaweedfs-java-client</artifactId>
+    <version>0.0.2.RELEASE</version>
+</dependency>
+```
+
+##### Gradle
+```
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    compile 'net.anumbrella.seaweedfs:seaweedfs-java-client:0.0.2.RELEASE'
+}
+```
+
 
 ##### Create a connection manager
 ```java
