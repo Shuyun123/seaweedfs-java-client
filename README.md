@@ -5,6 +5,7 @@
 [![Apache license](https://img.shields.io/badge/license-Apache-blue.svg)](http://opensource.org/licenses/Apache)
 
 
+## 项目太久没更新，看着很多人还在使用，后期打算重构一下，大家有兴趣的可以一起，添加一些issue，讨论一下怎么实现，实现哪些功能
 
 
 # Quick Start

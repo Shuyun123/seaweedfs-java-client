@@ -4,3 +4,17 @@ target/
 .DS_Store
 .vscode
 .settings
+target
+*.zip
+*.bak
+*debug.*
+projects.ls
+*dependency-reduced-pom.xml
+deploy
+start*.sh
+package*.sh
+start*.cmd
+package*.cmd
+apidoc
+log
+.flattened-pom.xml
