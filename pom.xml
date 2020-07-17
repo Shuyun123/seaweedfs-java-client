@@ -41,7 +41,6 @@
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <jackson.version>2.11.1</jackson.version>
     <httpclient.version> 4.5.12</httpclient.version>
-    <ehcache.version>3.1.1</ehcache.version>
     <spring.version>4.3.1.RELEASE</spring.version>
     <junit.version>4.11</junit.version>
   </properties>
