@@ -109,6 +109,13 @@
       <version>28.2-jre</version>
     </dependency>
 
+    <!-- Caching tool (Like guava but better performance) -->
+    <dependency>
+        <groupId>com.github.ben-manes.caffeine</groupId>
+        <artifactId>caffeine</artifactId>
+        <version>1.0.0</version>
+    </dependency>
+
   </dependencies>
   <build>
     <plugins>
