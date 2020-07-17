@@ -16,15 +16,45 @@ ConnectionProperties connectionProperties
                     .host("localhost")
                     .port(9333)
                     .maxConnection(100).build();
+// Apply properties
+fileSource.setProperties(connectionProperties);
 // Startup manager and listens for the change
 fileSource.startup();
 ```
 
 ##### Create a file operation template
+[SeaWeed Write Protocol](https://github.com/chrislusf/seaweedfs#write-file)
 ```java
 // Template used with connection manager
 FileTemplate template = new FileTemplate(fileSource.getConnection());
+
 template.saveFileByStream("filename.doc", someFile);
+```
+
+##### Fetch a files content
+[SeaWeed Read Protocol](https://github.com/chrislusf/seaweedfs#read-file)
+```java
+// This is the value returned by assign (dir/assign) when you write a file
+// https://github.com/chrislusf/seaweedfs#write-file
+String fileId = "3,01637037d6";
+
+FileTemplate template = new FileTemplate(fileSource.getConnection());
+
+StreamResponse fileStream = template.getFileStream(fileId);
+// Will print the content within the file
+System.out.println("File Content: " + fileStream.getOutputStream());
+```
+
+##### Fetching File Handlers (Name, Size, LastModified, Content Type)
+```java
+// This is the value returned by assign (dir/assign) when you write a file
+// https://github.com/chrislusf/seaweedfs#write-file
+String fileId = "3,01637037d6";
+
+FileTemplate template = new FileTemplate(fileSource.getConnection());
+
+FileHandleStatus fileStatus = template.getFileStatus(fileHandleStatus.getFileId());
+System.out.println("File Name: " + fileStatus.getFileName());
 ```
 
 ## License
