@@ -1,6 +1,7 @@
 package net.anumbrella.seaweedfs.core;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import net.anumbrella.seaweedfs.core.content.FilerUploadResult;
 import net.anumbrella.seaweedfs.core.http.JsonResponse;
 import net.anumbrella.seaweedfs.core.http.StreamResponse;
 import net.anumbrella.seaweedfs.exception.SeaweedfsFileNotFoundException;
@@ -29,7 +30,17 @@ public class FilerWrapper {
         this.connection = connection;
     }
 
+    public FilerUploadResult uploadWithResult(String url, String fileName, InputStream stream, ContentType contentType) throws IOException {
+        JsonResponse jsonResponse = uploadFile0(url, fileName, stream, contentType);
+        return objectMapper.readValue(jsonResponse.json,FilerUploadResult.class);
+    }
+
     public long uploadFile(String url, String fileName, InputStream stream, ContentType contentType) throws IOException {
+        JsonResponse jsonResponse = uploadFile0(url, fileName, stream, contentType);
+        return (Integer) objectMapper.readValue(jsonResponse.json, Map.class).get("size");
+    }
+
+    private JsonResponse uploadFile0(String url, String fileName, InputStream stream, ContentType contentType) throws IOException {
         HttpPost httpPost = new HttpPost(url);
         MultipartEntityBuilder builder = MultipartEntityBuilder.create();
 
@@ -45,7 +56,7 @@ public class FilerWrapper {
             jsonResponse = new JsonResponse("{\"name\":\"" + fileName + "\",\"size\":0}", HttpStatus.SC_OK);
         }
         Utils.convertResponseStatusToException(jsonResponse.statusCode, url, false, false, false, false);
-        return (Integer) objectMapper.readValue(jsonResponse.json, Map.class).get("size");
+        return jsonResponse;
     }
 
     public StreamResponse getFileStream(String url) throws IOException {
