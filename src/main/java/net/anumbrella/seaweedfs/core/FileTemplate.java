@@ -243,6 +243,18 @@ public class FileTemplate implements InitializingBean, DisposableBean {
     }
 
     /**
+     * 通过Filer接口上传文件并返回结果对象
+     * @param fileName 文件名
+     * @param inputStream 文件应该以InputStream形式被传入
+     * @param url filer的URL
+     * @return {@link FilerUploadResult}
+     * @throws IOException Http connection is fail or server response within some error message.
+     */
+    public FilerUploadResult filerSaveAndFetch(String fileName, InputStream inputStream, String url) throws IOException {
+        return filerWrapper.uploadWithResult(url, fileName, inputStream, ContentType.DEFAULT_BINARY);
+    }
+
+    /**
      * 通过Filer接口删除文件
      * @param url 要删除文件的URL
      * @throws IOException Http connection is fail or server response within some error message.
