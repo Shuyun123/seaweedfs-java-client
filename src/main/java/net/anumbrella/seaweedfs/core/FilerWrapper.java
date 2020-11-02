@@ -59,8 +59,7 @@ public class FilerWrapper {
         HttpDelete httpDelete = new HttpDelete(url);
         JsonResponse jsonResponse = connection.fetchJsonResultByRequest(httpDelete);
         if (jsonResponse != null) {
-            Utils.convertResponseStatusToException(connection.fetchJsonResultByRequest(httpDelete).statusCode,
-                    url, false, false, false, false);
+            Utils.convertResponseStatusToException(jsonResponse.statusCode, url, false, false, false, false);
         } else {
             //SeaweedFS用filer删除文件时没有返回值，只有204状态
             Utils.convertResponseStatusToException(204, url, false, false, false, false);
